@@ -29,6 +29,13 @@ int readAsis(char *fileName)
 
   if (strlen(fileName) > 1 && strcmp(fileType, "asis") != 0)
   {
+    if (fptr == NULL)
+    {
+      // handle error (path doesnt exist)
+      printf("%s", "404 Not Found");
+      exit(0);
+    }
+
     printf("%s", "415 Unsupported Media Type.");
     exit(0);
   }

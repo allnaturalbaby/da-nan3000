@@ -51,13 +51,13 @@ static void skeleton_daemon()
 
     /* Close all open file descriptors */
     int x;
-    for (x = sysconf(_SC_OPEN_MAX); x>=0; x--)
+    for (x = sysconf(_SC_OPEN_MAX); x >= 0; x--)
     {
-        close (x);
+        close(x);
     }
 
     /* Open the log file */
-    openlog ("firstdaemon", LOG_PID, LOG_DAEMON);
+    openlog("firstdaemon", LOG_PID, LOG_DAEMON);
 }
 
 int main()
@@ -67,15 +67,15 @@ int main()
     while (1)
     {
         //TODO: Insert daemon code here.
-        syslog (LOG_NOTICE, "First daemon started.");
-        
-        system("/home/hevos/da-nan3000/webtjener");
+        syslog(LOG_NOTICE, "First daemon started.");
 
-        sleep (20);
+        system("${HOME}/Desktop/da-nan3000/webtjener");
+
+        sleep(20);
         break;
     }
 
-    syslog (LOG_NOTICE, "First daemon terminated.");
+    syslog(LOG_NOTICE, "First daemon terminated.");
     closelog();
 
     return EXIT_SUCCESS;
