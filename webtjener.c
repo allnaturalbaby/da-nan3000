@@ -27,7 +27,7 @@ int readAsis(char *fileName)
 
   fptr = fopen(asisPath, "r");
 
-  if (strcmp(fileType, "asis") != 0)
+  if (strlen(fileName) > 1 && strcmp(fileType, "asis") != 0)
   {
     printf("%s", "415 Unsupported Media Type.");
     exit(0);
