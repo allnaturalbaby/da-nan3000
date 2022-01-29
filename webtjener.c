@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define LOKAL_PORT 55556
+#define LOKAL_PORT 8080
 #define BAK_LOGG 10 // Størrelse på for kø ventende forespørsler
 
 const char *getFileType(const char *fileName)
