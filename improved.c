@@ -11,6 +11,7 @@
 #define LOKAL_PORT 80
 #define BAK_LOGG 10 // Størrelse på for kø ventende forespørsler
 
+
 const char *getFileType(const char *fileName)
 {
   const char *dot = strrchr(fileName, '.');
@@ -18,6 +19,7 @@ const char *getFileType(const char *fileName)
     return "";
   return dot + 1;
 }
+
 
 int readAsis(char *fileName)
 {
@@ -61,6 +63,7 @@ int readAsis(char *fileName)
   return 0;
 }
 
+
 void handleHttpRequest(int sd)
 {
   const int request_buffer_size = 65536;
@@ -88,57 +91,56 @@ void handleHttpRequest(int sd)
 
 static void skelly_daemon(){
     pid_t pid;
-    pid = fork();
+    pid = fork(); // fork of process
     
-    if (pid < 0){
+    if (pid < 0){ //an error with forking
         exit(EXIT_FAILURE);
     }
 
-    if (pid > 0){
+    if (pid > 0){ //terminate parent
         exit(EXIT_SUCCESS);
     }
 
-    if (setsid() < 0){
+    if (setsid() < 0){ //set child as session leader
         exit(EXIT_FAILURE);
     }
 
-    signal(SIGCHLD, SIG_IGN);
-    signal(SIGHUP, SIG_IGN);
-
-    pid = fork();
+    pid = fork();//fork a second time
 
     if (pid < 0){
-        exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE); //error
     }
 
     if (pid > 0){
-        exit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS); //terminate parent
     }
 
-    umask(0); //fakking up?
+    umask(0); //set new file permissions
 
-    chroot("var/www/mp1");
+    chroot("var/www/mp1"); //change directory
 
     int x;
-    for (x=sysconf(_SC_OPEN_MAX); x>=0; x--){
+    for (x=sysconf(_SC_OPEN_MAX); x>=0; x--){ //close all file descriptors
         close(x);
     }
 }
 
+
 int privilege(){
 
-    uid_t uid = 1000;
-    gid_t gid = 1000;
+    uid_t uid = 1000; //set user and grup to main user
+    gid_t gid = 1000; //should have sepearte service user for security
 
-    if (getuid() == 0) {
-        setuid(uid);
+    if (getuid() == 0) { //check if root
+        setuid(uid); //set as user
         setgid(gid);
     }
 
-    if (setuid(0) != -1){
-        exit(0);
+    if (setuid(0) != -1){ //check possibility to regain root
+        exit(0); //exit if possible
     }
 }
+
 
 int web_service(){
   struct sockaddr_in lok_adr;
@@ -161,7 +163,7 @@ int web_service(){
   else
     exit(1);
 
-  privilege();//root drit
+  privilege();//root seperasjon
 
   // Venter på forespørsel om forbindelse
   listen(sd, BAK_LOGG);
@@ -194,10 +196,11 @@ int web_service(){
   return 0;
 }
 
-int main(){
-    skelly_daemon();
+
+int main(){ //the magic
+    skelly_daemon(); //starter daemoniseringen av programmet
 
     while(1){
-        web_service();
+        web_service(); // starter webtjenesten
     }
 }
