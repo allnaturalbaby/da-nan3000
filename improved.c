@@ -37,20 +37,24 @@ int readAsis(char *fileName)
   {
     if (fptr == NULL)
     {
+      
+      fopen("response/404.html", "r");
+
       // handle error (path doesnt exist)
-      printf("%s", "404 Not Found");
+      //printf("%s", "404 Not Found");
       exit(0);
     }
-
-    printf("%s", "415 Unsupported Media Type.");
-    exit(0);
+    //printf("%s", "415 Unsupported Media Type.");
+    fopen("response/415.html", "r");
+    //exit(0);
   }
 
   if (fptr == NULL)
   {
     // handle error (path doesnt exist)
-    printf("%s", "404 Not Found");
-    exit(0);
+    //printf("%s", "404 Not Found");
+    fopen("response/404.html", "r");
+    //exit(0);
   }
 
   c = fgetc(fptr);
