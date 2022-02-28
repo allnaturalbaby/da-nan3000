@@ -10,3 +10,7 @@ UID is set to 1000, your local user.
 ```sudo ./improved ``` - start the daemon
 
 ```./kill.sh ``` - kill the process
+
+```./nc.sh {File} ``` - netcat search towards the File (index.asis etc.)
+
+```sudo ./create_log.sh ``` - if having log or running problems try this

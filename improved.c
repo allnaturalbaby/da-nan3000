@@ -11,6 +11,25 @@
 #define LOCAL_PORT 80
 #define BACK_LOG 10 // Størrelse på for kø ventende forespørsler
 
+int err(char *error_string, int type){
+    FILE *err_file = fopen("log.txt", "a");
+    dup2(fileno(err_file), STDERR_FILENO);
+
+    if(type == 0){
+      fprintf(stderr, "[ERROR]:\t\t");
+    }
+    if(type == 1){
+      fprintf(stderr, "[SUCCESS]:\t");
+    }
+    if(type == 2) {
+      fprintf(stderr, "[INFO]:\t\t");
+    }
+
+    fprintf(stderr, error_string);
+    fprintf(stderr, "\n");
+    fclose(err_file);
+}
+
 
 const char *getFileType(const char *fileName)
 {
@@ -30,6 +49,16 @@ int readAsis(char *fileName)
   char c;
   const char *fileType = getFileType(fileName);
 
+  //Send log value
+    char *buf;
+    size_t sz;
+    sz = snprintf(NULL, 0, "Attemting to open file %s", fileName);
+    buf = (char *)malloc(sz + 1);
+    snprintf(buf, sz+1, "Attemting to open file %s", fileName);
+
+    err(buf, 2);
+
+
   strcat(asisPath, fileName);
 
   fptr = fopen(asisPath, "r");
@@ -40,13 +69,15 @@ int readAsis(char *fileName)
     {
       //404 error handling
       fptr = fopen("./response/404.html", "r");
+      err("Code 404", 0);
     }
     else{
   //415 error handling
     fptr = fopen("./response/415.html", "r");
+    err("Code 415", 0);
     }
   }
-
+  
   //read through file
   c = fgetc(fptr);
   while (c != EOF)
@@ -68,7 +99,7 @@ void handleHttpRequest(int sd)
 
   if (bytes_recvd < 0)
   {
-    perror("revc");
+    err("No bytes recieved.", 0);
     return;
   }
 
@@ -85,10 +116,13 @@ void handleHttpRequest(int sd)
 }
 
 static void skelly_daemon(){
+
+    err("Daemonizing starting", 2);
     pid_t pid;
     pid = fork(); // fork of process
     
     if (pid < 0){ //an error with forking
+        err("Forking failed", 0);
         exit(EXIT_FAILURE);
     }
 
@@ -97,12 +131,14 @@ static void skelly_daemon(){
     }
 
     if (setsid() < 0){ //set child as session leader
+        err("Set id failed", 0);
         exit(EXIT_FAILURE);
     }
 
     pid = fork();//fork a second time
 
     if (pid < 0){
+        err("Forking failed", 0);
         exit(EXIT_FAILURE); //error
     }
 
@@ -118,6 +154,8 @@ static void skelly_daemon(){
     for (x=sysconf(_SC_OPEN_MAX); x>=0; x--){ //close all file descriptors
         close(x);
     }
+
+    err("Daemon running", 1);
 }
 
 
@@ -132,15 +170,19 @@ int privilege(){
     }
 
     if (setuid(0) != -1){ //check possibility to regain root
+        err("Regained root permissions, exiting...", 0);
         exit(0); //exit if possible
+        
     }
+
+    err("Privilege seperation complete!", 1);
 }
 
 
 int web_service(){
+  err("Starting web server", 2);
   struct sockaddr_in lok_adr;
   int sd, ny_sd;
-
   // Setter opp socket-strukturen
   sd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
@@ -153,12 +195,22 @@ int web_service(){
   lok_adr.sin_addr.s_addr = htonl(INADDR_ANY);
 
   // Kobler sammen socket og lokal adresse
-  if (0 == bind(sd, (struct sockaddr *)&lok_adr, sizeof(lok_adr)))
-    fprintf(stderr, "Prosess %d er knyttet til port %d.\n", getpid(), LOCAL_PORT);
+  if (0 == bind(sd, (struct sockaddr *)&lok_adr, sizeof(lok_adr))){
+
+    char *buf;
+    size_t sz;
+    sz = snprintf(NULL, 0, "Process %d is connected to %d.", getpid(), LOCAL_PORT, 2);
+    buf = (char *)malloc(sz + 1);
+    snprintf(buf, sz+1, "Process %d is connected to %d.", getpid(), LOCAL_PORT, 2);
+
+    err(buf, 2);
+
+  }
   else
     exit(1);
 
   privilege();//root seperasjon
+  err("Waiting for request", 2);
 
   // Venter på forespørsel om forbindelse
   listen(sd, BACK_LOG);
@@ -191,11 +243,11 @@ int web_service(){
   return 0;
 }
 
-
 int main(){ //the magic
-    skelly_daemon(); //starter daemoniseringen av programmet
+  
+  skelly_daemon(); //starter daemoniseringen av programmet
 
-    while(1){
-        web_service(); // starter webtjenesten
-    }
+  while(1){
+      web_service(); // starter webtjenesten
+  }
 }
