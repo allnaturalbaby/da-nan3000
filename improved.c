@@ -8,8 +8,8 @@
 #include <sys/stat.h>
 #include <syslog.h>
 
-#define LOKAL_PORT 80
-#define BAK_LOGG 10 // Størrelse på for kø ventende forespørsler
+#define LOCAL_PORT 80
+#define BACK_LOG 10 // Størrelse på for kø ventende forespørsler
 
 
 const char *getFileType(const char *fileName)
@@ -24,6 +24,7 @@ const char *getFileType(const char *fileName)
 int readAsis(char *fileName)
 {
   FILE *fptr;
+  FILE *response;
   char asisPath[100] = "./asis";
 
   char c;
@@ -37,26 +38,16 @@ int readAsis(char *fileName)
   {
     if (fptr == NULL)
     {
-      
-      fopen("response/404.html", "r");
-
-      // handle error (path doesnt exist)
-      //printf("%s", "404 Not Found");
-      exit(0);
+      //404 error handling
+      fptr = fopen("./response/404.html", "r");
     }
-    //printf("%s", "415 Unsupported Media Type.");
-    fopen("response/415.html", "r");
-    //exit(0);
+    else{
+  //415 error handling
+    fptr = fopen("./response/415.html", "r");
+    }
   }
 
-  if (fptr == NULL)
-  {
-    // handle error (path doesnt exist)
-    //printf("%s", "404 Not Found");
-    fopen("response/404.html", "r");
-    //exit(0);
-  }
-
+  //read through file
   c = fgetc(fptr);
   while (c != EOF)
   {
@@ -158,19 +149,19 @@ int web_service(){
 
   // Initierer lokal adresse
   lok_adr.sin_family = AF_INET;
-  lok_adr.sin_port = htons((u_short)LOKAL_PORT);
+  lok_adr.sin_port = htons((u_short)LOCAL_PORT);
   lok_adr.sin_addr.s_addr = htonl(INADDR_ANY);
 
   // Kobler sammen socket og lokal adresse
   if (0 == bind(sd, (struct sockaddr *)&lok_adr, sizeof(lok_adr)))
-    fprintf(stderr, "Prosess %d er knyttet til port %d.\n", getpid(), LOKAL_PORT);
+    fprintf(stderr, "Prosess %d er knyttet til port %d.\n", getpid(), LOCAL_PORT);
   else
     exit(1);
 
   privilege();//root seperasjon
 
   // Venter på forespørsel om forbindelse
-  listen(sd, BAK_LOGG);
+  listen(sd, BACK_LOG);
   while (1)
   {
 
