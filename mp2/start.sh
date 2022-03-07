@@ -1,6 +1,6 @@
-./kill.sh
+./scripts/kill.sh
+sudo ./scripts/create_log.sh
 gcc improved.c -o improved
-sudo ./create_log.sh
 sudo ./improved
 
 echo "Have a nice day cocksucker ;]"

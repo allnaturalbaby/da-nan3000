@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<group12>
+    <member>
+        <name>Viktor</name>
+        <age>Old</age>
+        <gender>Male</gender>
+    </member>
+    <member>
+        <name>Christian</name>
+        <age>Old</age>
+        <gender>Unknown</gender>
+    </member>
+    <member>
+        <name>Nora</name>
+        <age>Old</age>
+        <gender>Female</gender>
+    </member>
+    <member>
+        <name>Håkon</name>
+        <age>Perfect</age>
+        <gender>Male</gender>
+    </member>
+</group12>
