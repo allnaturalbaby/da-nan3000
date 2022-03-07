@@ -148,7 +148,7 @@ static void skelly_daemon(){
 
     umask(0); //set new file permissions
 
-    chroot("var/www/mp1"); //change directory
+    chroot("/var/www/mp1"); //change directory
 
     int x;
     for (x=sysconf(_SC_OPEN_MAX); x>=0; x--){ //close all file descriptors
