@@ -1,13 +1,12 @@
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <syslog.h>
+#include <unistd.h>
 
-static void skeleton_daemon()
-{
+static void skeleton_daemon() {
     pid_t pid;
 
     /* Fork off the parent process */
@@ -26,7 +25,7 @@ static void skeleton_daemon()
         exit(EXIT_FAILURE);
 
     /* Catch, ignore and handle signals */
-    //TODO: Implement a working signal handler */
+    // TODO: Implement a working signal handler */
     signal(SIGCHLD, SIG_IGN);
     signal(SIGHUP, SIG_IGN);
 
@@ -47,12 +46,11 @@ static void skeleton_daemon()
     /* Change the working directory to the root directory */
     /* or another appropriated directory */
     /*chdir("/home/hevos/Desktop/da-nan/da-nan3000/");*/
-    chroot("var/www/mp1"); //Change location to webroot
+    chroot("var/www/mp1"); // Change location to webroot
 
     /* Close all open file descriptors */
     int x;
-    for (x = sysconf(_SC_OPEN_MAX); x >= 0; x--)
-    {
+    for (x = sysconf(_SC_OPEN_MAX); x >= 0; x--) {
         close(x);
     }
 
@@ -60,13 +58,11 @@ static void skeleton_daemon()
     openlog("firstdaemon", LOG_PID, LOG_DAEMON);
 }
 
-int main()
-{
+int main() {
     skeleton_daemon();
 
-    while (1)
-    {
-        //TODO: Insert daemon code here.
+    while (1) {
+        // TODO: Insert daemon code here.
         syslog(LOG_NOTICE, "First daemon started.");
 
         system("${HOME}/Desktop/da-nan3000/webtjener");

@@ -1,7 +1,7 @@
-#include <unistd.h>
-#include <stdlib.h>
 #include <stdio.h>
-int err(char *error_string){
+#include <stdlib.h>
+#include <unistd.h>
+int err(char *error_string) {
     FILE *err_file = fopen("log.txt", "a");
     dup2(fileno(err_file), STDERR_FILENO);
     fprintf(stderr, error_string);
@@ -9,6 +9,6 @@ int err(char *error_string){
     fclose(err_file);
 }
 
-int main(){
+int main() {
     err("Something");
 }
