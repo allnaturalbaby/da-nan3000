@@ -78,7 +78,7 @@ char *getFileType(char *fileName) {
     return dot + 1;
 }
 
-int readAsis(char *fileName, int sd) {
+int readFilePath(char *fileName, int sd) {
     FILE *fptr;
     char pagesPath[100] = "./pages";
     char response[BUFSIZ];
@@ -148,6 +148,7 @@ int readAsis(char *fileName, int sd) {
 void handleHttpRequest(int sd) {
     const int request_buffer_size = 65536;
     char request[request_buffer_size];
+    char response[BUFSIZ];
 
     int bytes_recvd = recv(sd, request, request_buffer_size - 1, 0);
 
@@ -161,11 +162,12 @@ void handleHttpRequest(int sd) {
     char *path;
     path = strtok(NULL, " ");
 
-    if (strlen(path) >= 1) // not needed?
-    {
-        // printf("%s", path);
-        readAsis(path, sd);
-    }
+    FILE *fptr = fopen("./index.html", "r");
+
+    if (strlen(path) >= 1) {
+        readFilePath(path, sd);
+    } else {
+        }
 }
 
 static void skelly_daemon() {
