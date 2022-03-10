@@ -1,10 +1,13 @@
+#include "headers.h"
 #include <arpa/inet.h>
+#include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <syslog.h>
 #include <unistd.h>
 
@@ -30,10 +33,32 @@ int logger(char *error_string, int type) {
     fclose(err_file);
 }
 
-int isFileExtensionAllowed(char *fileExt) {
-    // if (strcmp(fileExt, "ico") == 0) {
-    //     return -1;
-    // }
+char *getResponseHeaderFromExtension(char *extension) {
+    if (strcmp(extension, "html") == 0 || strcmp(extension, "htm") == 0) {
+        return text_html;
+    }
+    if (strcmp(extension, "jpeg") == 0) {
+        return image_jpeg;
+    }
+    if (strcmp(extension, "txt") == 0) {
+        return text_plain;
+    }
+    if (strcmp(extension, "gif") == 0) {
+        return image_gif;
+    }
+    if (strcmp(extension, "css") == 0) {
+        return text_css;
+    }
+    if (strcmp(extension, "xml") == 0) {
+        return application_xml;
+    }
+    if (strcmp(extension, "json") == 0) {
+        return application_json;
+    }
+    return "";
+}
+
+char *isFileExtensionAllowed(char *fileExt) {
     char *buf = NULL;
     char *p = NULL;
 
@@ -41,8 +66,9 @@ int isFileExtensionAllowed(char *fileExt) {
     int count = 0;
 
     FILE *mimeFile;
+    char *mimeType;
 
-    mimeFile = fopen("./mimetypes/mime.types", "r");
+    mimeFile = fopen("/mimetypes/mime.types", "r");
 
     if (mimeFile != NULL) {
         while (0 < (count = getline(&buf, &length, mimeFile))) {
@@ -55,11 +81,12 @@ int isFileExtensionAllowed(char *fileExt) {
             buf[count - 1] = '\0';
 
             p = strtok(buf, "\t ");
+            mimeType = p;
 
             while (0 != (p = strtok(NULL, "\t "))) {
                 if (strcmp(fileExt, p) == 0) {
-                    logger(p, 2);
-                    return 0;
+                    // logger(mimeType, 2);
+                    return mimeType;
                 }
             }
         }
@@ -67,8 +94,8 @@ int isFileExtensionAllowed(char *fileExt) {
     } else {
         logger("nopp", 2);
     }
-    free(buf);
-    return -1;
+    // free(buf);
+    return NULL;
 }
 
 char *getFileType(char *fileName) {
@@ -80,13 +107,15 @@ char *getFileType(char *fileName) {
 
 int readFilePath(char *fileName, int sd) {
     FILE *fptr;
-    char pagesPath[100] = "./pages";
+    char pagesPath[100] = "/pages";
     char response[BUFSIZ];
 
     struct stat statbuf;
 
     char c;
     char *fileType = getFileType(fileName);
+
+    char *contentType = getResponseHeaderFromExtension(fileType);
 
     // Send log value
     char *buf;
@@ -104,41 +133,38 @@ int readFilePath(char *fileName, int sd) {
     fptr = fopen(pagesPath, "r");
 
     if (stat(pagesPath, &statbuf) != 0) {
-        fptr = fopen("./response/404.html", "r");
+        contentType = bad_request;
+        fptr = fopen("/response/404.html", "r");
         logger("Code 404", 0);
     }
 
     if (stat(pagesPath, &statbuf) == 0 && strlen(fileName) > 1) {
-        if (strcmp(fileType, "asis") != 0 && isFileExtensionAllowed(fileType) != 0) {
+        if (strcmp(fileType, "asis") != 0 && isFileExtensionAllowed(fileType) == NULL) {
             if (fptr == NULL) {
                 // 404 error handling
-                fptr = fopen("./response/404.html", "r");
+                contentType = bad_request;
+                fptr = fopen("/response/404.html", "r");
                 logger("Code 404", 0);
             } else {
                 // 415 error handling
-                fptr = fopen("./response/415.html", "r");
+                contentType = unsupported_type;
+                fptr = fopen("/response/415.html", "r");
                 logger("Code 415", 0);
             }
         }
-    } else {
-        // if (strcmp(fileType, "ico") != 0) {
-        fptr = fopen("./response/404.html", "r");
-        logger("Code 404", 0);
-        //}
     }
 
     if (strcmp(fileType, "jpeg") == 0 || strcmp(fileType, "png") == 0 || strcmp(fileType, "jpg") == 0 || strcmp(fileType, "gif") == 0) {
-        send(sd, response, strlen(response), 0);
+        send(sd, contentType, strlen(contentType), 0); // sends the appropriate header
         while (fread(response, 1, sizeof(response), fptr) != 0) {
             send(sd, response, sizeof(response), 0);
         }
     } else {
+        send(sd, contentType, strlen(contentType), 0); // sends the appropriate header
         while (fgets(response, BUFSIZ, fptr) != NULL) {
             send(sd, response, strlen(response), 0);
         }
     }
-
-    // greiene her er for å vise bildefiler
 
     fclose(fptr);
 
@@ -167,11 +193,10 @@ void handleHttpRequest(int sd) {
     if (strlen(path) >= 1) {
         readFilePath(path, sd);
     } else {
-        }
+    }
 }
 
 static void skelly_daemon() {
-
     logger("Daemonizing starting", 2);
     pid_t pid;
     pid = fork(); // fork of process
@@ -196,7 +221,6 @@ static void skelly_daemon() {
     signal(SIGCHLD, SIG_IGN);
 
     pid = fork(); // fork a second time
-
     if (pid < 0) {
         logger("Forking failed", 0);
         exit(EXIT_FAILURE); // error
@@ -206,8 +230,7 @@ static void skelly_daemon() {
         exit(EXIT_SUCCESS); // terminate parent
     }
 
-    chroot("/var/www/mp2"); // change directory
-    umask(0);               // set new file permissions
+    umask(0); // set new file permissions
 
     for (int x = sysconf(_SC_OPEN_MAX); x >= 0; x--) { // close all file descriptors
         close(x);
@@ -230,10 +253,6 @@ int privilege() {
     } else {
         logger("Not root", 2);
     }
-    // if (getuid() == 0) { // check if root
-    //     setuid(uid);     // set as user
-    //     setgid(gid);
-    // }
 
     if (setuid(0) != -1) { // check possibility to regain root
         logger("Regained root permissions, exiting...", 0);
@@ -274,6 +293,11 @@ int web_service() {
         exit(1);
     }
 
+    int errVal = chroot("/var/www/mp2/");
+    if (errVal < 0) {
+        perror("/var/www/mp2/");
+    }
+
     privilege(); // root seperasjon
     logger("Waiting for request", 2);
 
@@ -300,9 +324,8 @@ int web_service() {
     return 0;
 }
 
-int main() {                // the magic
-    chroot("/var/www/mp2"); // change directory
-    skelly_daemon();        // starter daemoniseringen av programmet
+int main() {         // the magic
+    skelly_daemon(); // starter daemoniseringen av programmet
 
     while (1) {
         web_service(); // starter webtjenesten
