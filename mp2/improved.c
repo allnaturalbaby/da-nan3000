@@ -293,7 +293,7 @@ int web_service() {
         exit(1);
     }
 
-    int errVal = chroot("/var/www/mp2/");
+    int errVal = chroot("/var/www/");
     if (errVal < 0) {
         perror("/var/www/mp2/");
     }
