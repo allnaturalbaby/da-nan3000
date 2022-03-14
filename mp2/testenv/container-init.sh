@@ -5,39 +5,31 @@ CONFS=$PWD/container
 if [ ! -d $CONFS ];then
 
     mkdir -p $CONFS/{bin,proc,etc,var/www,var/log}
-    cp -r ../pages_/ $CONFS/var/www/
-    gcc ../improved.c -o $CONFS/bin/improved
-    ls -la $CONFS/bin | grep improved
-    touch $CONFS/bin/log.txt
-    #chown 1000:1000 $CONFS/bin/debug.log
-    echo "pussy" > $CONFS/bin/log.txt
+    cp -r ../pages_/ $CONFS/var/www/pages
+    cp -r ../mimetypes_/ $CONFS/var/www/mimetypes
+    gcc --static ../improved.c -o $CONFS/bin/improved.out
+    
+    #ls -la $CONFS/bin | grep improved
+    
+    touch $CONFS/var/log/log.txt
 
-    echo test1
+    #sudo chown 1000:1000 $CONFS/var/log/log.txt
+    #sudo chown 1000:1000 $CONFS/bin/log.txt
+    #chown 1000:1000 $CONFS/bin/debug.log
 
     cd       $CONFS/bin/
     cp       /bin/busybox .
 
     for P in $(./busybox --list | grep -v busybox); do ln busybox $P; done;
 
-    echo test2
+    echo "::once:/bin/improved.out" > $CONFS/etc/inittab
 
-    #echo "::once:/bin/httpd -p 8080 -h /var/www" >  $ROTFS/etc/inittab
-    echo "::once:/sbin/improved" > $CONFS/etc/inittab
-
-    echo test3
-
-    #echo "hallo" >  $ROTFS/var/www/hallo.txt
-    #echo $PWD
-    #cp -r $PWD/pages $ROTFS/var/www/
-    
-    #exit 1
-    echo $CONFS
 fi
 
-echo test4
+#echo test4
 #sudo PATH=/bin unshare -f -p --mount-proc /usr/sbin/chroot $ROTFS bin/init
 
-sudo PATH=/bin unshare -f -p --mount-proc /usr/sbin/chroot $CONFS bin/init
+sudo SHELL=/bin/sh PATH=/bin unshare -f -p --mount-proc /usr/sbin/chroot $CONFS bin/init
 
 #  # Inspisere:
 #  pstree -p UNSHARE_PID

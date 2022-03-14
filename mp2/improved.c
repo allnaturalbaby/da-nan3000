@@ -15,9 +15,6 @@
 #define BACK_LOG 10 // Størrelse på for kø ventende forespørsler
 
 int logger(char *error_string, int type) {
-    FILE *err_file = fopen("log.txt", "a");
-    dup2(fileno(err_file), STDERR_FILENO);
-
     if (type == 0) {
         fprintf(stderr, "[ERROR]:\t\t");
     }
@@ -30,7 +27,6 @@ int logger(char *error_string, int type) {
 
     fprintf(stderr, "%s", error_string);
     fprintf(stderr, "\n");
-    fclose(err_file);
 }
 
 char *getResponseHeaderFromExtension(char *extension) {
@@ -232,10 +228,6 @@ static void skelly_daemon() {
 
     umask(0); // set new file permissions
 
-    for (int x = sysconf(_SC_OPEN_MAX); x >= 0; x--) { // close all file descriptors
-        close(x);
-    }
-
     logger("Daemon running", 1);
 }
 
@@ -277,10 +269,10 @@ int web_service() {
     lok_adr.sin_family = AF_INET;
     lok_adr.sin_port = htons((u_short)LOCAL_PORT);
     lok_adr.sin_addr.s_addr = htonl(INADDR_ANY);
-
+    
     // Kobler sammen socket og lokal adresse
-    if (0 == bind(sd, (struct sockaddr *)&lok_adr, sizeof(lok_adr))) {
-
+    if (bind(sd, (struct sockaddr *)&lok_adr, sizeof(lok_adr)) == 0) {
+        perror("bind");
         char *buf;
         size_t sz;
         sz = snprintf(NULL, 0, "Process %d is connected to %d.", getpid(), LOCAL_PORT);
@@ -288,15 +280,16 @@ int web_service() {
         snprintf(buf, sz + 1, "Process %d is connected to %d.", getpid(), LOCAL_PORT);
 
         logger(buf, 2);
-
     } else {
         exit(1);
+        logger("Failed to bind", 0);
     }
 
-    int errVal = chroot("/var/www/");
-    if (errVal < 0) {
-        perror("/var/www/mp2/");
-    }
+    chroot("/var/www/");
+    //int errVal = chroot("/var/www/");
+    //if (errVal < 0) {
+    //    perror("/var/www/");
+    //}
 
     privilege(); // root seperasjon
     logger("Waiting for request", 2);
@@ -325,6 +318,11 @@ int web_service() {
 }
 
 int main() {         // the magic
+    FILE *log_file;
+    log_file = fopen("/var/log/log.txt", "a");
+    dup2(fileno(log_file), STDERR_FILENO);
+    fclose(log_file);
+
     skelly_daemon(); // starter daemoniseringen av programmet
 
     while (1) {
