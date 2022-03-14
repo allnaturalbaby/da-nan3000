@@ -41,7 +41,7 @@ const char *getFileType(const char *fileName) {
 int readAsis(char *fileName) {
     FILE *fptr;
     FILE *response;
-    char asisPath[100] = "./asis";
+    char asisPath[100] = "/asis";
 
     struct stat statbuf;
 
@@ -65,16 +65,16 @@ int readAsis(char *fileName) {
         if (strcmp(fileType, "asis") != 0) {
             if (fptr == NULL) {
                 // 404 error handling
-                fptr = fopen("./response/404.html", "r");
+                fptr = fopen("/response/404.html", "r");
                 err("Code 404", 0);
             } else {
                 // 415 error handling
-                fptr = fopen("./response/415.html", "r");
+                fptr = fopen("/response/415.html", "r");
                 err("Code 415", 0);
             }
         }
     } else {
-        fptr = fopen("./response/404.html", "r");
+        fptr = fopen("/response/404.html", "r");
         err("Code 404", 0);
     }
 
