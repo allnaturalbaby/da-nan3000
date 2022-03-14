@@ -26,7 +26,7 @@ int err(char *error_string, int type) {
         fprintf(stderr, "[INFO]:\t\t");
     }
 
-    fprintf(stderr, error_string);
+    fprintf(stderr, "%s", error_string);
     fprintf(stderr, "\n");
     fclose(err_file);
 }
@@ -192,9 +192,9 @@ int web_service() {
 
         char *buf;
         size_t sz;
-        sz = snprintf(NULL, 0, "Process %d is connected to %d.", getpid(), LOCAL_PORT, 2);
+        sz = snprintf(NULL, 0, "Process %d is connected to %d.", getpid(), LOCAL_PORT);
         buf = (char *)malloc(sz + 1);
-        snprintf(buf, sz + 1, "Process %d is connected to %d.", getpid(), LOCAL_PORT, 2);
+        snprintf(buf, sz + 1, "Process %d is connected to %d.", getpid(), LOCAL_PORT);
 
         err(buf, 2);
 
