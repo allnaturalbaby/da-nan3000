@@ -79,13 +79,22 @@ char *isFileExtensionAllowed(char *fileExt) {
             p = strtok(buf, "\t ");
             mimeType = p;
 
+            char *buf;
+            size_t sz;
             while (0 != (p = strtok(NULL, "\t "))) {
                 if (strcmp(fileExt, p) == 0) {
-                    // logger(mimeType, 2);
+                    // logs returned mimeType. this needs to be tested and implemented in the readFilePath / getResponseHeaderFromExtension method
+                    sz = snprintf(NULL, 0, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\n\r\n", mimeType);
+                    buf = (char *)malloc(sz + 1);
+                    snprintf(buf, sz + 1, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\n\r\n", mimeType);
+
+                    logger(buf, 2);
+                    
+                    // return buf
                     return mimeType;
                 }
             }
-        }
+        } // else return NULL
         // fclose(mimeFile);
     } else {
         logger("nopp", 2);
@@ -162,7 +171,12 @@ int readFilePath(char *fileName, int sd) {
         }
     }
 
-    fclose(fptr);
+    /*send(sd, contentType, strlen(contentType), 0);
+    while (fread(response, sizeof(response) + 1, 1, fptr) != 0) {
+        send(sd, response, sizeof(response), 0);
+    }
+
+    fclose(fptr); */
 
     return 0;
 }
@@ -196,13 +210,14 @@ static void skelly_daemon() {
     logger("Daemonizing starting", 2);
     pid_t pid;
     pid = fork(); // fork of process
-
+    
     if (pid < 0) { // an error with forking
         logger("Forking failed", 0);
         exit(EXIT_FAILURE);
     }
 
     if (pid > 0) { // terminate parent
+        logger("Parent terminated", 2);
         exit(EXIT_SUCCESS);
     }
 
