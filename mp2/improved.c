@@ -1,4 +1,3 @@
-#include "headers.h"
 #include <arpa/inet.h>
 #include <errno.h>
 #include <signal.h>
@@ -29,29 +28,20 @@ int logger(char *error_string, int type) {
     fprintf(stderr, "\n");
 }
 
-char *getResponseHeaderFromExtension(char *extension) {
-    if (strcmp(extension, "html") == 0 || strcmp(extension, "htm") == 0) {
-        return text_html;
-    }
-    if (strcmp(extension, "jpeg") == 0) {
-        return image_jpeg;
-    }
-    if (strcmp(extension, "txt") == 0) {
-        return text_plain;
-    }
-    if (strcmp(extension, "gif") == 0) {
-        return image_gif;
-    }
-    if (strcmp(extension, "css") == 0) {
-        return text_css;
-    }
-    if (strcmp(extension, "xml") == 0) {
-        return application_xml;
-    }
-    if (strcmp(extension, "json") == 0) {
-        return application_json;
-    }
-    return "";
+char *getResponseHeaderFromMimeType(char *mimeType, int contentLength) {
+
+    char *buf;
+    size_t sz;
+    
+
+    // logs returned mimeType. this needs to be tested and implemented in the readFilePath / getResponseHeaderFromExtension method
+    sz = snprintf(NULL, 0, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n\r\n", mimeType, contentLength);
+    buf = (char *)malloc(sz + 1);
+    snprintf(buf, sz + 1, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n\r\n", mimeType, contentLength);
+
+    //logger(buf, 2);
+    
+    return buf;
 }
 
 char *isFileExtensionAllowed(char *fileExt) {
@@ -79,25 +69,15 @@ char *isFileExtensionAllowed(char *fileExt) {
             p = strtok(buf, "\t ");
             mimeType = p;
 
-            char *buf;
-            size_t sz;
             while (0 != (p = strtok(NULL, "\t "))) {
                 if (strcmp(fileExt, p) == 0) {
-                    // logs returned mimeType. this needs to be tested and implemented in the readFilePath / getResponseHeaderFromExtension method
-                    sz = snprintf(NULL, 0, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\n\r\n", mimeType);
-                    buf = (char *)malloc(sz + 1);
-                    snprintf(buf, sz + 1, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\n\r\n", mimeType);
-
-                    logger(buf, 2);
-                    
-                    // return buf
                     return mimeType;
                 }
             }
         } // else return NULL
         // fclose(mimeFile);
     } else {
-        logger("nopp", 2);
+        logger("Mimefile was not opened", 2);
     }
     // free(buf);
     return NULL;
@@ -119,59 +99,60 @@ int readFilePath(char *fileName, int sd) {
 
     char c;
     char *fileType = getFileType(fileName);
+    char *mimeType = isFileExtensionAllowed(fileType);
+    char *responseHeader = getResponseHeaderFromMimeType(mimeType, sizeof());
 
-    char *contentType = getResponseHeaderFromExtension(fileType);
+    logger(responseHeader, 1);
 
     // Send log value
     char *buf;
     size_t sz;
-    if (strcmp(fileType, "ico") != 0) {
+    //if (strcmp(fileType, "ico") != 0) {
         sz = snprintf(NULL, 0, "Attemting to open file %s", fileName);
         buf = (char *)malloc(sz + 1);
         snprintf(buf, sz + 1, "Attemting to open file %s", fileName);
 
         logger(buf, 2);
-    }
+    //}
 
     strcat(pagesPath, fileName);
 
     fptr = fopen(pagesPath, "r");
 
     if (stat(pagesPath, &statbuf) != 0) {
-        contentType = bad_request;
+        responseHeader = "HTTP/1.1 404 File not found\n\n";
         fptr = fopen("/response/404.html", "r");
         logger("Code 404", 0);
     }
 
     if (stat(pagesPath, &statbuf) == 0 && strlen(fileName) > 1) {
-        if (strcmp(fileType, "asis") != 0 && isFileExtensionAllowed(fileType) == NULL) {
+        if (strcmp(fileType, "asis") != 0 && mimeType == NULL) {
             if (fptr == NULL) {
                 // 404 error handling
-                contentType = bad_request;
+                responseHeader = "HTTP/1.1 404 File not found\n\n";
                 fptr = fopen("/response/404.html", "r");
                 logger("Code 404", 0);
             } else {
                 // 415 error handling
-                contentType = unsupported_type;
+                responseHeader = "HTTP/1.1 415 Unsupported Media Type\n\n";;
                 fptr = fopen("/response/415.html", "r");
                 logger("Code 415", 0);
             }
         }
     }
-
     if (strcmp(fileType, "jpeg") == 0 || strcmp(fileType, "png") == 0 || strcmp(fileType, "jpg") == 0 || strcmp(fileType, "gif") == 0) {
-        send(sd, contentType, strlen(contentType), 0); // sends the appropriate header
+        send(sd, responseHeader, strlen(responseHeader), 0); // sends the appropriate header
         while (fread(response, 1, sizeof(response), fptr) != 0) {
             send(sd, response, sizeof(response), 0);
         }
     } else {
-        send(sd, contentType, strlen(contentType), 0); // sends the appropriate header
+        send(sd, responseHeader, strlen(responseHeader), 0); // sends the appropriate header
         while (fgets(response, BUFSIZ, fptr) != NULL) {
             send(sd, response, strlen(response), 0);
         }
     }
 
-    /*send(sd, contentType, strlen(contentType), 0);
+    /*send(sd, responseHeader, strlen(responseHeader), 0);
     while (fread(response, sizeof(response) + 1, 1, fptr) != 0) {
         send(sd, response, sizeof(response), 0);
     }
