@@ -28,19 +28,21 @@ int logger(char *error_string, int type) {
     fprintf(stderr, "\n");
 }
 
-char *getResponseHeaderFromMimeType(char *mimeType, int contentLength) {
+char *getResponseHeaderFromMimeType(char *mimeType, long int contentLength) {
 
     char *buf;
     size_t sz;
-    
+
+    int length = (int) contentLength;
+
+    length = 999999;
 
     // logs returned mimeType. this needs to be tested and implemented in the readFilePath / getResponseHeaderFromExtension method
-    sz = snprintf(NULL, 0, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n\r\n", mimeType, contentLength);
+    sz = snprintf(NULL, 0, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n\r\n", mimeType, length);
     buf = (char *)malloc(sz + 1);
-    snprintf(buf, sz + 1, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n\r\n", mimeType, contentLength);
+    snprintf(buf, sz + 1, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n\r\n", mimeType, length);
 
     //logger(buf, 2);
-    
     return buf;
 }
 
@@ -89,6 +91,8 @@ char *getFileType(char *fileName) {
         return "";
     return dot + 1;
 }
+//TODO implement sizeof file method
+
 
 int readFilePath(char *fileName, int sd) {
     FILE *fptr;
@@ -100,9 +104,7 @@ int readFilePath(char *fileName, int sd) {
     char c;
     char *fileType = getFileType(fileName);
     char *mimeType = isFileExtensionAllowed(fileType);
-    char *responseHeader = getResponseHeaderFromMimeType(mimeType, sizeof());
-
-    logger(responseHeader, 1);
+    char *responseHeader;
 
     // Send log value
     char *buf;
@@ -119,11 +121,23 @@ int readFilePath(char *fileName, int sd) {
 
     fptr = fopen(pagesPath, "r");
 
+    fseek(fptr, 0L, SEEK_END);
+    long int jalla = ftell(fptr);
+    responseHeader = getResponseHeaderFromMimeType(mimeType, jalla);
+    logger(responseHeader, 2);
+    
+
     if (stat(pagesPath, &statbuf) != 0) {
         responseHeader = "HTTP/1.1 404 File not found\n\n";
         fptr = fopen("/response/404.html", "r");
         logger("Code 404", 0);
     }
+
+    /*sz = snprintf(NULL, 0, "Woogiboogi %s", statbuf.st_size);
+    buf = (char *)malloc(sz + 1);
+    snprintf(buf, sz + 1, "Woogiboogi %s", statbuf.st_size);
+
+    logger(buf, 2);*/
 
     if (stat(pagesPath, &statbuf) == 0 && strlen(fileName) > 1) {
         if (strcmp(fileType, "asis") != 0 && mimeType == NULL) {
@@ -158,7 +172,6 @@ int readFilePath(char *fileName, int sd) {
     }
 
     fclose(fptr); */
-
     return 0;
 }
 
