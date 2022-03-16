@@ -19,7 +19,7 @@ sqlite3 diktbase.db < eksempeldata.sql
 
 
 ### Logge inn
-```
+```bash
 Url: https://localhost/cgi-bin/test5.cgi/login
 Metode: POST
 Bodyparameter: <user><username></username><password></password></user> 
