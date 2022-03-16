@@ -157,6 +157,21 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
 		echo $response
 	fi
 
+	if [ ${url_array[3]} = "dikt" ]; then
+		echo "Lag nytt dikt"
+
+		xmlInput=$BODY
+		newPoem=$(xmllint --xpath "//text/text()" - <<<"$xmlInput")
+
+		echo $newPoem
+
+		lastId=$(sqlite3 $database_path "SELECT diktID FROM dikt ORDER BY diktID DESC LIMIT 1;")
+		let "newId = $lastId + 1"
+
+		sqlite3 $database_path "INSERT INTO dikt VALUES('$newId', '$newPoem', 'norasophie96@hotmail.com');"
+
+		sqlite3 $database_path "SELECT * FROM dikt;"
+	fi
 fi
 
 if [ "$REQUEST_METHOD" = "PUT" ]; then

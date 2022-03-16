@@ -57,7 +57,7 @@ Respons: <diktbase><dikt><diktID></diktID><dikt></dikt><epostadresser></epostadr
 ### Endre dikt
 ```
 Url: https://localhost/
-Metode:
+Metode: PUT
 Bodyparameter: 
 Header:
 Respons:
@@ -66,7 +66,7 @@ Respons:
 ### Legge til dikt
 ```
 Url: https://localhost/
-Metode:
+Metode: POST
 Bodyparameter: 
 Header:
 Respons:
@@ -75,7 +75,7 @@ Respons:
 ### Slette ett dikt
 ```
 Url: https://localhost/
-Metode:
+Metode: DELETE
 Bodyparameter: 
 Header:
 Respons:
@@ -84,7 +84,7 @@ Respons:
 ### Slette alle egne dikt
 ```
 Url: https://localhost/
-Metode:
+Metode: DELETE
 Bodyparameter: 
 Header:
 Respons:
