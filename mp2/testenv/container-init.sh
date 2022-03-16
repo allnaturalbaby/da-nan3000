@@ -20,7 +20,7 @@ if [ ! -d $CONFS ];then
 
     echo "::once:/bin/improved.out" > $CONFS/etc/inittab
 
-    #echo $CONFS
+    echo $CONFS
 fi
 
 sudo SHELL=/bin/sh PATH=/bin unshare -f -p --mount-proc /usr/sbin/chroot $CONFS /bin/init
