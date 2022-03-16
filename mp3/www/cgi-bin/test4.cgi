@@ -11,7 +11,7 @@ cat << EOF
 	<title>helloworld1</title>
 	</head>
 	<body>
-	<h1>Hello World!</h1>
+	Variabelen QUERY_STRING: $QUERY_STRING
 	</body>
 </html>
 EOF

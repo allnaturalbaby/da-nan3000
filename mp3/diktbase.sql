@@ -11,7 +11,7 @@ CREATE TABLE bruker(
 );
 
 CREATE TABLE sesjon(
-        sesjonsID NUMBER NOT NULL,
+        sesjonsID TEXT NOT NULL,
         epostadresse TEXT,
         PRIMARY KEY (sesjonsID),
         FOREIGN KEY (epostadresse) REFERENCES bruker (epostadresse)

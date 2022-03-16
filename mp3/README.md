@@ -17,3 +17,75 @@ Legge eksempeldata til i database(databasen må eksistere):
 sqlite3 diktbase.db < eksempeldata.sql
 
 
+
+### Logge inn
+```
+Url: https://localhost/cgi-bin/test5.cgi/login
+Metode: POST
+Bodyparameter: <user><username></username><password></password></user> 
+Header: Content-type: application/xml
+Respons: <response><status></status><statustext></statustext><sessionid></sessionid><user></user></response>
+```
+
+### Logge ut
+```
+Url: https://localhost/cgi/bin/test5.cgi/logout
+Metode: POST
+Bodyparameter: <user><sessionid></sessionid><user> 
+Header: Content-type: application/xml
+Respons: <response><status></status><statustext></statustext><sessionid></sessionid><user></user></response>
+```
+
+### Hente ett dikt
+```
+Url: https://localhost/cgi-bin/test5.cgi/dikt/$id
+Metode: GET
+Bodyparameter: ""
+Header: Content-type: application/xml
+Respons: <diktbase><dikt><diktID></diktID><dikt></dikt><epostadresser></epostadresse></dikt></diktbase>
+```
+
+### Hente alle dikt
+```
+Url: https://localhost/cgi-bin/test5.cgi/dikt
+Metode: GET
+Bodyparameter: "" 
+Header: Content-type: application/xml
+Respons: <diktbase><dikt><diktID></diktID><dikt></dikt><epostadresser></epostadresse></dikt></diktbase>
+```
+
+### Endre dikt
+```
+Url: https://localhost/
+Metode:
+Bodyparameter: 
+Header:
+Respons:
+```
+
+### Legge til dikt
+```
+Url: https://localhost/
+Metode:
+Bodyparameter: 
+Header:
+Respons:
+```
+
+### Slette ett dikt
+```
+Url: https://localhost/
+Metode:
+Bodyparameter: 
+Header:
+Respons:
+```
+
+### Slette alle egne dikt
+```
+Url: https://localhost/
+Metode:
+Bodyparameter: 
+Header:
+Respons:
+```
