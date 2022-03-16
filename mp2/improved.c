@@ -28,19 +28,20 @@ int logger(char *error_string, int type) {
     fprintf(stderr, "\n");
 }
 
-char *getResponseHeaderFromMimeType(char *mimeType, long int contentLength) {
-
+char *getResponseHeaderFromMimeType(char *mimeType, int contentLength) {
+    //TODO fix this so that files are actually showing
     char *buf;
     size_t sz;
 
-    int length = (int) contentLength;
+   /* struct stat st;
+            stat(path, &st);
 
-    length = 999999;
+            sprintf(header, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\nContent-Length: %lld\r\n\r\n", type, st.st_size);*/
 
     // logs returned mimeType. this needs to be tested and implemented in the readFilePath / getResponseHeaderFromExtension method
-    sz = snprintf(NULL, 0, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n\r\n", mimeType, length);
+    sz = snprintf(NULL, 0, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n\r\n", mimeType, contentLength);
     buf = (char *)malloc(sz + 1);
-    snprintf(buf, sz + 1, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n\r\n", mimeType, length);
+    snprintf(buf, sz + 1, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n\r\n", mimeType, contentLength);
 
     //logger(buf, 2);
     return buf;
@@ -79,7 +80,7 @@ char *isFileExtensionAllowed(char *fileExt) {
         } // else return NULL
         // fclose(mimeFile);
     } else {
-        logger("Mimefile was not opened", 2);
+        logger("MimeFile was not opened", 2);
     }
     // free(buf);
     return NULL;
@@ -91,7 +92,6 @@ char *getFileType(char *fileName) {
         return "";
     return dot + 1;
 }
-//TODO implement sizeof file method
 
 
 int readFilePath(char *fileName, int sd) {
@@ -121,10 +121,12 @@ int readFilePath(char *fileName, int sd) {
 
     fptr = fopen(pagesPath, "r");
 
-    fseek(fptr, 0L, SEEK_END);
-    long int jalla = ftell(fptr);
-    responseHeader = getResponseHeaderFromMimeType(mimeType, jalla);
+    fseek(fptr, 0, SEEK_END); //Moves pointer to end of file to find size
+    int pageLength = ftell(fptr);
+    responseHeader = getResponseHeaderFromMimeType(mimeType, pageLength);
     logger(responseHeader, 2);
+
+    fseek(fptr, 0, SEEK_SET); //Moves pointer back up to the file to read through file
     
 
     if (stat(pagesPath, &statbuf) != 0) {
@@ -161,8 +163,8 @@ int readFilePath(char *fileName, int sd) {
         }
     } else {
         send(sd, responseHeader, strlen(responseHeader), 0); // sends the appropriate header
-        while (fgets(response, BUFSIZ, fptr) != NULL) {
-            send(sd, response, strlen(response), 0);
+        while (fgets(response, pageLength, fptr) != NULL) {
+            send(sd, response, pageLength, 0);
         }
     }
 
@@ -172,6 +174,7 @@ int readFilePath(char *fileName, int sd) {
     }
 
     fclose(fptr); */
+    fclose(fptr);
     return 0;
 }
 
