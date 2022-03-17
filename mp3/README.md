@@ -18,27 +18,9 @@ sqlite3 diktbase.db < eksempeldata.sql
 
 
 
-### Logge inn
-```
-Url: https://localhost/cgi-bin/test5.cgi/login
-Metode: POST
-Bodyparameter: <user><username></username><password></password></user> 
-Header: Content-type: application/xml
-Respons: <response><status></status><statustext></statustext><sessionid></sessionid><user></user></response>
-```
-
-### Logge ut
-```
-Url: https://localhost/cgi/bin/test5.cgi/logout
-Metode: POST
-Bodyparameter: <user><sessionid></sessionid><user> 
-Header: Content-type: application/xml
-Respons: <response><status></status><statustext></statustext><sessionid></sessionid><user></user></response>
-```
-
 ### Hente ett dikt
 ```
-Url: https://localhost/cgi-bin/test5.cgi/dikt/$id
+Url: https://localhost/cgi-bin/diktbase.cgi/dikt/$id
 Metode: GET
 Bodyparameter: ""
 Header: Content-type: application/xml
@@ -47,45 +29,63 @@ Respons: <diktbase><dikt><diktID></diktID><dikt></dikt><epostadresser></epostadr
 
 ### Hente alle dikt
 ```
-Url: https://localhost/cgi-bin/test5.cgi/dikt
+Url: https://localhost/cgi-bin/diktbase.cgi/dikt
 Metode: GET
 Bodyparameter: "" 
 Header: Content-type: application/xml
 Respons: <diktbase><dikt><diktID></diktID><dikt></dikt><epostadresser></epostadresse></dikt></diktbase>
 ```
 
-### Endre dikt
+### Logge inn
 ```
-Url: https://localhost/
-Metode: PUT
-Bodyparameter: 
-Header:
-Respons:
+Url: https://localhost/cgi-bin/diktbase.cgi/login
+Metode: POST
+Bodyparameter: <user><username></username><password></password></user> 
+Header: Content-type: application/xml
+Respons: <response><status></status><statustext></statustext><sessionid></sessionid><user></user></response>
 ```
 
-### Legge til dikt
+### Logge ut
 ```
-Url: https://localhost/
+Url: https://localhost/cgi/bin/diktbase.cgi/logout
 Metode: POST
-Bodyparameter: 
-Header:
-Respons:
+Bodyparameter: <user><sessionid></sessionid><user> 
+Header: Content-type: application/xml
+Respons: <response><status></status><statustext></statustext><sessionid></sessionid><user></user></response>
+```
+
+### Lage nytt dikt
+```
+Url: https://localhost/cgi-bin/diktbase.cgi/dikt
+Metode: POST
+Bodyparameter: <dikt><text></text></dikt>
+Header: Content-type: application/xml
+Respons: <response><status></status><statustext></statustext><sessionid></sessionid><user></user></response>
+```
+
+### Endre dikt
+```
+Url: https://localhost/cgi-bin/diktbase.cgi/dikt/$id
+Metode: PUT
+Bodyparameter: <dikt><text></text></dikt>
+Header: Content-type: application/xml
+Respons: 
 ```
 
 ### Slette ett dikt
 ```
-Url: https://localhost/
+Url: https://localhost/cgi-bin/diktbase.cgi/dikt
 Metode: DELETE
-Bodyparameter: 
-Header:
-Respons:
+Bodyparameter: ""
+Header: Content-type: application/xml
+Respons: <response><status></status><statustext></statustext><sessionid></sessionid><user></user></response>
 ```
 
 ### Slette alle egne dikt
 ```
-Url: https://localhost/
+Url: https://localhost/cgi-bin/diktbase.cgi/dikt/$id
 Metode: DELETE
-Bodyparameter: 
-Header:
-Respons:
+Bodyparameter: ""
+Header: Content-type: application/xml
+Respons: <response><status></status><statustext></statustext><sessionid></sessionid><user></user></response>
 ```
