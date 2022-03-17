@@ -28,23 +28,22 @@ int logger(char *error_string, int type) {
     fprintf(stderr, "\n");
 }
 
-char *getResponseHeaderFromMimeType(char *mimeType, int contentLength) {
+char *getResponseHeaderFromMimeType(char *mimeType, char *path) {
     //TODO fix this so that files are actually showing
     char *buf;
-    size_t sz;
+    char *header;
+    struct stat st;
+    int length;
+    
+    stat(path, &st);
+    length = st.st_size;
 
-   /* struct stat st;
-            stat(path, &st);
+    sprintf(header, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", mimeType);
+    //sprintf(header, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\nContent-Length: %lld\r\n\r\n", mimeType, length);
+    
+    logger(header, 2);
 
-            sprintf(header, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\nContent-Length: %lld\r\n\r\n", type, st.st_size);*/
-
-    // logs returned mimeType. this needs to be tested and implemented in the readFilePath / getResponseHeaderFromExtension method
-    sz = snprintf(NULL, 0, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n\r\n", mimeType, contentLength);
-    buf = (char *)malloc(sz + 1);
-    snprintf(buf, sz + 1, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n\r\n", mimeType, contentLength);
-
-    //logger(buf, 2);
-    return buf;
+    return header;
 }
 
 char *isFileExtensionAllowed(char *fileExt) {
@@ -121,12 +120,7 @@ int readFilePath(char *fileName, int sd) {
 
     fptr = fopen(pagesPath, "r");
 
-    fseek(fptr, 0, SEEK_END); //Moves pointer to end of file to find size
-    int pageLength = ftell(fptr);
-    responseHeader = getResponseHeaderFromMimeType(mimeType, pageLength);
-    logger(responseHeader, 2);
-
-    fseek(fptr, 0, SEEK_SET); //Moves pointer back up to the file to read through file
+    responseHeader = getResponseHeaderFromMimeType(mimeType, pagesPath);
     
 
     if (stat(pagesPath, &statbuf) != 0) {
@@ -156,24 +150,31 @@ int readFilePath(char *fileName, int sd) {
             }
         }
     }
-    if (strcmp(fileType, "jpeg") == 0 || strcmp(fileType, "png") == 0 || strcmp(fileType, "jpg") == 0 || strcmp(fileType, "gif") == 0) {
+    logger("before", 2);
+   /* if (strcmp(fileType, "jpeg") == 0 || strcmp(fileType, "png") == 0 || strcmp(fileType, "jpg") == 0 || strcmp(fileType, "gif") == 0) {
         send(sd, responseHeader, strlen(responseHeader), 0); // sends the appropriate header
+        logger("if-pic", 2);
         while (fread(response, 1, sizeof(response), fptr) != 0) {
             send(sd, response, sizeof(response), 0);
+            logger("pic-while",2);
         }
     } else {
-        send(sd, responseHeader, strlen(responseHeader), 0); // sends the appropriate header
-        while (fgets(response, pageLength, fptr) != NULL) {
-            send(sd, response, pageLength, 0);
+        logger("else",2);
+        logger(responseHeader, 2);
+        //send(sd, responseHeader, strlen(responseHeader), 0); // sends the appropriate header
+        while (fgets(response, BUFSIZ, fptr) != NULL) {
+            send(sd, response, strlen(response), 0);
+            logger(response, 2);
+            logger("text-while",2);
         }
-    }
+    }*/
 
-    /*send(sd, responseHeader, strlen(responseHeader), 0);
-    while (fread(response, sizeof(response) + 1, 1, fptr) != 0) {
+    send(sd, responseHeader, strlen(responseHeader), 0);
+    while (fread(response, 1, sizeof(response), fptr) != 0) {
         send(sd, response, sizeof(response), 0);
     }
 
-    fclose(fptr); */
+    logger("fclose", 2);
     fclose(fptr);
     return 0;
 }
@@ -287,9 +288,9 @@ int web_service() {
         perror("bind");
         char *buf;
         size_t sz;
-        sz = snprintf(NULL, 0, "Process %d is connected to %d.", getpid(), LOCAL_PORT);
+        sz = snprintf(NULL, 0, "Process %d is connected to port %d.", getpid(), LOCAL_PORT);
         buf = (char *)malloc(sz + 1);
-        snprintf(buf, sz + 1, "Process %d is connected to %d.", getpid(), LOCAL_PORT);
+        snprintf(buf, sz + 1, "Process %d is connected to port %d.", getpid(), LOCAL_PORT);
 
         logger(buf, 2);
     } else {
@@ -337,7 +338,5 @@ int main() {         // the magic
 
     skelly_daemon(); // starter daemoniseringen av programmet
 
-    while (1) {
-        web_service(); // starter webtjenesten
-    }
+    web_service(); // starter webtjenesten
 }
