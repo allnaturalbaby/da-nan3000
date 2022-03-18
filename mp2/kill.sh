@@ -1,12 +1,7 @@
-cd testenv
-rm -r container
+#!/bin/bash
 
 AUXPID=$(ps aux | less | grep ./improved | head -1 | awk '{ print $2 }')
-kill -9 $AUXPID
+sudo kill -s KILL $AUXPID
 
 JOBPID=$(jobs -p | awk '{ print $3 }')   
-kill -9 $JOBPID
-
-./container-init.sh
-
-echo "Have a nice day /redacted/ ;]"
+sudo kill -s KILL $JOBPID

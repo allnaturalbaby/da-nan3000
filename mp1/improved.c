@@ -26,7 +26,7 @@ int err(char *error_string, int type) {
         fprintf(stderr, "[INFO]:\t\t");
     }
 
-    fprintf(stderr, error_string);
+    fprintf(stderr, "%s", error_string);
     fprintf(stderr, "\n");
     fclose(err_file);
 }
@@ -41,7 +41,7 @@ const char *getFileType(const char *fileName) {
 int readAsis(char *fileName) {
     FILE *fptr;
     FILE *response;
-    char asisPath[100] = "./asis";
+    char asisPath[100] = "/asis";
 
     struct stat statbuf;
 
@@ -65,16 +65,16 @@ int readAsis(char *fileName) {
         if (strcmp(fileType, "asis") != 0) {
             if (fptr == NULL) {
                 // 404 error handling
-                fptr = fopen("./response/404.html", "r");
+                fptr = fopen("/response/404.html", "r");
                 err("Code 404", 0);
             } else {
                 // 415 error handling
-                fptr = fopen("./response/415.html", "r");
+                fptr = fopen("/response/415.html", "r");
                 err("Code 415", 0);
             }
         }
     } else {
-        fptr = fopen("./response/404.html", "r");
+        fptr = fopen("/response/404.html", "r");
         err("Code 404", 0);
     }
 
@@ -192,9 +192,9 @@ int web_service() {
 
         char *buf;
         size_t sz;
-        sz = snprintf(NULL, 0, "Process %d is connected to %d.", getpid(), LOCAL_PORT, 2);
+        sz = snprintf(NULL, 0, "Process %d is connected to %d.", getpid(), LOCAL_PORT);
         buf = (char *)malloc(sz + 1);
-        snprintf(buf, sz + 1, "Process %d is connected to %d.", getpid(), LOCAL_PORT, 2);
+        snprintf(buf, sz + 1, "Process %d is connected to %d.", getpid(), LOCAL_PORT);
 
         err(buf, 2);
 

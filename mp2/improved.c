@@ -1,4 +1,3 @@
-#include "headers.h"
 #include <arpa/inet.h>
 #include <errno.h>
 #include <signal.h>
@@ -15,9 +14,6 @@
 #define BACK_LOG 10 // Størrelse på for kø ventende forespørsler
 
 int logger(char *error_string, int type) {
-    FILE *err_file = fopen("log.txt", "a");
-    dup2(fileno(err_file), STDERR_FILENO);
-
     if (type == 0) {
         fprintf(stderr, "[ERROR]:\t\t");
     }
@@ -30,32 +26,24 @@ int logger(char *error_string, int type) {
 
     fprintf(stderr, "%s", error_string);
     fprintf(stderr, "\n");
-    fclose(err_file);
 }
 
-char *getResponseHeaderFromExtension(char *extension) {
-    if (strcmp(extension, "html") == 0 || strcmp(extension, "htm") == 0) {
-        return text_html;
-    }
-    if (strcmp(extension, "jpeg") == 0) {
-        return image_jpeg;
-    }
-    if (strcmp(extension, "txt") == 0) {
-        return text_plain;
-    }
-    if (strcmp(extension, "gif") == 0) {
-        return image_gif;
-    }
-    if (strcmp(extension, "css") == 0) {
-        return text_css;
-    }
-    if (strcmp(extension, "xml") == 0) {
-        return application_xml;
-    }
-    if (strcmp(extension, "json") == 0) {
-        return application_json;
-    }
-    return "";
+char *getResponseHeaderFromMimeType(char *mimeType, char *path) {
+    // TODO fix this so that files are actually showing
+    char *buf;
+    char *header;
+    struct stat st;
+    int length;
+
+    stat(path, &st);
+    length = st.st_size;
+
+    // sprintf(header, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", mimeType);
+    sprintf(header, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n", mimeType, length);
+
+    logger(header, 2);
+
+    return header;
 }
 
 char *isFileExtensionAllowed(char *fileExt) {
@@ -85,14 +73,13 @@ char *isFileExtensionAllowed(char *fileExt) {
 
             while (0 != (p = strtok(NULL, "\t "))) {
                 if (strcmp(fileExt, p) == 0) {
-                    // logger(mimeType, 2);
                     return mimeType;
                 }
             }
-        }
+        } // else return NULL
         // fclose(mimeFile);
     } else {
-        logger("nopp", 2);
+        logger("MimeFile was not opened", 2);
     }
     // free(buf);
     return NULL;
@@ -114,60 +101,62 @@ int readFilePath(char *fileName, int sd) {
 
     char c;
     char *fileType = getFileType(fileName);
-
-    char *contentType = getResponseHeaderFromExtension(fileType);
+    char *mimeType = isFileExtensionAllowed(fileType);
+    char *responseHeader;
 
     // Send log value
     char *buf;
     size_t sz;
-    if (strcmp(fileType, "ico") != 0) {
-        sz = snprintf(NULL, 0, "Attemting to open file %s", fileName);
-        buf = (char *)malloc(sz + 1);
-        snprintf(buf, sz + 1, "Attemting to open file %s", fileName);
+    // if (strcmp(fileType, "ico") != 0) {
+    sz = snprintf(NULL, 0, "Attemting to open file %s", fileName);
+    buf = (char *)malloc(sz + 1);
+    snprintf(buf, sz + 1, "Attemting to open file %s", fileName);
 
-        logger(buf, 2);
-    }
+    logger(buf, 2);
+    //}
 
     strcat(pagesPath, fileName);
 
     fptr = fopen(pagesPath, "r");
 
+    responseHeader = getResponseHeaderFromMimeType(mimeType, pagesPath);
+
     if (stat(pagesPath, &statbuf) != 0) {
-        contentType = bad_request;
+        responseHeader = "HTTP/1.1 404 File not found\n\n";
         fptr = fopen("/response/404.html", "r");
         logger("Code 404", 0);
     }
 
+    int length = statbuf.st_size;
+
     if (stat(pagesPath, &statbuf) == 0 && strlen(fileName) > 1) {
-        if (strcmp(fileType, "asis") != 0 && isFileExtensionAllowed(fileType) == NULL) {
+        if (strcmp(fileType, "asis") != 0 && mimeType == NULL) {
             if (fptr == NULL) {
                 // 404 error handling
-                contentType = bad_request;
+                responseHeader = "HTTP/1.1 404 File not found\n\n";
                 fptr = fopen("/response/404.html", "r");
                 logger("Code 404", 0);
             } else {
                 // 415 error handling
-                contentType = unsupported_type;
+                responseHeader = "HTTP/1.1 415 Unsupported Media Type\n\n";
+                ;
                 fptr = fopen("/response/415.html", "r");
                 logger("Code 415", 0);
             }
         }
     }
+    logger("before", 2);
 
-    if (strcmp(fileType, "jpeg") == 0 || strcmp(fileType, "png") == 0 || strcmp(fileType, "jpg") == 0 || strcmp(fileType, "gif") == 0) {
-        send(sd, contentType, strlen(contentType), 0); // sends the appropriate header
-        while (fread(response, 1, sizeof(response), fptr) != 0) {
-            send(sd, response, sizeof(response), 0);
-        }
-    } else {
-        send(sd, contentType, strlen(contentType), 0); // sends the appropriate header
-        while (fgets(response, BUFSIZ, fptr) != NULL) {
-            send(sd, response, strlen(response), 0);
-        }
+    if (strcmp(fileType, "asis") != 0) {
+        send(sd, responseHeader, strlen(responseHeader), 0);
+    }
+    size_t read_bytes;
+    while ((read_bytes = fread(response, 1, BUFSIZ, fptr)) > 0) {
+        send(sd, response, read_bytes, 0);
     }
 
+    logger("fclose", 2);
     fclose(fptr);
-
     return 0;
 }
 
@@ -176,6 +165,7 @@ void handleHttpRequest(int sd) {
     char request[request_buffer_size];
     char response[BUFSIZ];
 
+    // recieves the request from a client
     int bytes_recvd = recv(sd, request, request_buffer_size - 1, 0);
 
     if (bytes_recvd < 0) {
@@ -185,14 +175,25 @@ void handleHttpRequest(int sd) {
 
     char *requestType;
     requestType = strtok(request, " ");
+    logger(requestType, 2);
+
     char *path;
     path = strtok(NULL, " ");
+    logger(path, 2);
 
-    FILE *fptr = fopen("./index.html", "r");
-
-    if (strlen(path) >= 1) {
+    if (strlen(path) > 1) {
         readFilePath(path, sd);
     } else {
+        // send root/index
+        FILE *fptr = fopen("/pages/index.html", "r");
+
+        size_t read_bytes;
+        while ((read_bytes = fread(response, 1, BUFSIZ, fptr)) > 0) {
+            send(sd, response, read_bytes, 0);
+        }
+        logger("index", 2);
+        fclose(fptr);
+        return;
     }
 }
 
@@ -207,6 +208,7 @@ static void skelly_daemon() {
     }
 
     if (pid > 0) { // terminate parent
+        logger("Parent terminated", 2);
         exit(EXIT_SUCCESS);
     }
 
@@ -231,10 +233,6 @@ static void skelly_daemon() {
     }
 
     umask(0); // set new file permissions
-
-    for (int x = sysconf(_SC_OPEN_MAX); x >= 0; x--) { // close all file descriptors
-        close(x);
-    }
 
     logger("Daemon running", 1);
 }
@@ -279,24 +277,21 @@ int web_service() {
     lok_adr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     // Kobler sammen socket og lokal adresse
-    if (0 == bind(sd, (struct sockaddr *)&lok_adr, sizeof(lok_adr))) {
-
+    if (bind(sd, (struct sockaddr *)&lok_adr, sizeof(lok_adr)) == 0) {
+        perror("bind");
         char *buf;
         size_t sz;
-        sz = snprintf(NULL, 0, "Process %d is connected to %d.", getpid(), LOCAL_PORT);
+        sz = snprintf(NULL, 0, "Process %d is connected to port %d.", getpid(), LOCAL_PORT);
         buf = (char *)malloc(sz + 1);
-        snprintf(buf, sz + 1, "Process %d is connected to %d.", getpid(), LOCAL_PORT);
+        snprintf(buf, sz + 1, "Process %d is connected to port %d.", getpid(), LOCAL_PORT);
 
         logger(buf, 2);
-
     } else {
+        logger("Failed to bind", 0);
         exit(1);
     }
 
-    int errVal = chroot("/var/www/mp2/");
-    if (errVal < 0) {
-        perror("/var/www/mp2/");
-    }
+    chroot("/var/www/");
 
     privilege(); // root seperasjon
     logger("Waiting for request", 2);
@@ -324,10 +319,13 @@ int web_service() {
     return 0;
 }
 
-int main() {         // the magic
+int main() { // the magic
+    FILE *log_file;
+    log_file = fopen("/var/log/log.txt", "a");
+    dup2(fileno(log_file), STDERR_FILENO);
+    fclose(log_file);
+
     skelly_daemon(); // starter daemoniseringen av programmet
 
-    while (1) {
-        web_service(); // starter webtjenesten
-    }
+    web_service(); // starter webtjenesten
 }

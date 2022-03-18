@@ -1,6 +1,5 @@
 HTTP/1.1 200 OK
 Content-Type: text/plain
-Content-Length: 100
+Content-Length: 3
 
-Hello boys :D
-Dette er test.asis
+Bye
