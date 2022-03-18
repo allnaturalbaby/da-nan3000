@@ -20,8 +20,11 @@ isLoggedIn="0"
 
 echo "HTTP_COOKIE:" $HTTP_COOKIE
 
+
+#Function to check if user is logged in
 function checkIfLoggedIn() {
 
+	#Må fikse at den finner sessionid i cookie som den kan bruke til å sammenligne
 	cookieSessionId="s199dc93d-7ad0-443e-a4af-ebcd1bda82d7"
 
 	databaseSession=$(sqlite3 $database_path "SELECT * FROM sesjon WHERE sesjonsID = '$cookieSessionId';")
@@ -91,9 +94,8 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
 	IFS='\' #Reset delimeter
 
 
-	if [ $isLoggedIn = 0 ]; then
 	#Login
-		if [ ${url_array[3]} = "login" ]; then
+		if [ ${url_array[3]} = "login" -a $isLoggedIn = 0 ]; then
 
 			xmlInput=$BODY
 			username=$(xmllint --xpath "//username/text()" - <<<"$xmlInput") # Parsing xml user
@@ -166,22 +168,9 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
 					echo $response
 				fi
 			fi
-		fi
-	else 
-		response="<?xml version="1.0"?>"
-		response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
-		response+="<response><status>0</status><statustext>Bruker allerede logget inn</statustext><sessionid>"$currentSessionId"</sessionid><user>"$currentUser"</user></response>"
-		length=${#response}
-		echo "Content-Length: "$length
-		echo
-		echo $response
-	fi
-
-
-	if [ $isLoggedIn = 1 ]; then
 
 		#Logg ut
-		if [ ${url_array[3]} = 'logout' ]; then
+		elif [ ${url_array[3]} = 'logout' -a $isLoggedIn = 1 ]; then
 
 			xmlInput=$BODY
 			loggedInSessionId=$(xmllint --xpath "//sessionid/text()" - <<<"$xmlInput") #Getting sessionid from bodyparameter in xml
@@ -200,7 +189,7 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
 		
 
 		#Lage nytt dikt
-		elif [ ${url_array[3]} = "dikt" ]; then	#Post to make new poem localhost/cgi-bin/diktbase.cgi/dikt
+		elif [ ${url_array[3]} = "dikt" -a $isLoggedIn = 1 ]; then	#Post to make new poem localhost/cgi-bin/diktbase.cgi/dikt
 			
 			xmlInput=$BODY													
 			newPoem=$(xmllint --xpath "//text/text()" - <<<"$xmlInput")		#Getting new poem from bodyparameter in xml
@@ -227,15 +216,6 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
 			echo
 			echo $response
 		fi
-	else
-		response="<?xml version="1.0"?>"
-		response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
-		response+="<response><status>0</status><statustext>Bruker må være logget inn for å gjennomføre denne handlingen</statustext><sessionid></sessionid><user></user></response>"
-		length=${#response}
-		echo "Content-Length: "$length
-		echo
-		echo $response
-	fi
 fi
 
 
