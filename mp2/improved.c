@@ -29,18 +29,18 @@ int logger(char *error_string, int type) {
 }
 
 char *getResponseHeaderFromMimeType(char *mimeType, char *path) {
-    //TODO fix this so that files are actually showing
+    // TODO fix this so that files are actually showing
     char *buf;
     char *header;
     struct stat st;
     int length;
-    
+
     stat(path, &st);
     length = st.st_size;
 
-    sprintf(header, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", mimeType);
-    //sprintf(header, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\nContent-Length: %lld\r\n\r\n", mimeType, length);
-    
+    // sprintf(header, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", mimeType);
+    sprintf(header, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n", mimeType, length);
+
     logger(header, 2);
 
     return header;
@@ -92,7 +92,6 @@ char *getFileType(char *fileName) {
     return dot + 1;
 }
 
-
 int readFilePath(char *fileName, int sd) {
     FILE *fptr;
     char pagesPath[100] = "/pages";
@@ -108,12 +107,12 @@ int readFilePath(char *fileName, int sd) {
     // Send log value
     char *buf;
     size_t sz;
-    //if (strcmp(fileType, "ico") != 0) {
-        sz = snprintf(NULL, 0, "Attemting to open file %s", fileName);
-        buf = (char *)malloc(sz + 1);
-        snprintf(buf, sz + 1, "Attemting to open file %s", fileName);
+    // if (strcmp(fileType, "ico") != 0) {
+    sz = snprintf(NULL, 0, "Attemting to open file %s", fileName);
+    buf = (char *)malloc(sz + 1);
+    snprintf(buf, sz + 1, "Attemting to open file %s", fileName);
 
-        logger(buf, 2);
+    logger(buf, 2);
     //}
 
     strcat(pagesPath, fileName);
@@ -121,7 +120,6 @@ int readFilePath(char *fileName, int sd) {
     fptr = fopen(pagesPath, "r");
 
     responseHeader = getResponseHeaderFromMimeType(mimeType, pagesPath);
-    
 
     if (stat(pagesPath, &statbuf) != 0) {
         responseHeader = "HTTP/1.1 404 File not found\n\n";
@@ -129,11 +127,7 @@ int readFilePath(char *fileName, int sd) {
         logger("Code 404", 0);
     }
 
-    /*sz = snprintf(NULL, 0, "Woogiboogi %s", statbuf.st_size);
-    buf = (char *)malloc(sz + 1);
-    snprintf(buf, sz + 1, "Woogiboogi %s", statbuf.st_size);
-
-    logger(buf, 2);*/
+    int length = statbuf.st_size;
 
     if (stat(pagesPath, &statbuf) == 0 && strlen(fileName) > 1) {
         if (strcmp(fileType, "asis") != 0 && mimeType == NULL) {
@@ -144,34 +138,21 @@ int readFilePath(char *fileName, int sd) {
                 logger("Code 404", 0);
             } else {
                 // 415 error handling
-                responseHeader = "HTTP/1.1 415 Unsupported Media Type\n\n";;
+                responseHeader = "HTTP/1.1 415 Unsupported Media Type\n\n";
+                ;
                 fptr = fopen("/response/415.html", "r");
                 logger("Code 415", 0);
             }
         }
     }
     logger("before", 2);
-   /* if (strcmp(fileType, "jpeg") == 0 || strcmp(fileType, "png") == 0 || strcmp(fileType, "jpg") == 0 || strcmp(fileType, "gif") == 0) {
-        send(sd, responseHeader, strlen(responseHeader), 0); // sends the appropriate header
-        logger("if-pic", 2);
-        while (fread(response, 1, sizeof(response), fptr) != 0) {
-            send(sd, response, sizeof(response), 0);
-            logger("pic-while",2);
-        }
-    } else {
-        logger("else",2);
-        logger(responseHeader, 2);
-        //send(sd, responseHeader, strlen(responseHeader), 0); // sends the appropriate header
-        while (fgets(response, BUFSIZ, fptr) != NULL) {
-            send(sd, response, strlen(response), 0);
-            logger(response, 2);
-            logger("text-while",2);
-        }
-    }*/
 
-    send(sd, responseHeader, strlen(responseHeader), 0);
-    while (fread(response, 1, sizeof(response), fptr) != 0) {
-        send(sd, response, sizeof(response), 0);
+    if (strcmp(fileType, "asis") != 0) {
+        send(sd, responseHeader, strlen(responseHeader), 0);
+    }
+    size_t read_bytes;
+    while ((read_bytes = fread(response, 1, BUFSIZ, fptr)) > 0) {
+        send(sd, response, read_bytes, 0);
     }
 
     logger("fclose", 2);
@@ -184,6 +165,7 @@ void handleHttpRequest(int sd) {
     char request[request_buffer_size];
     char response[BUFSIZ];
 
+    // recieves the request from a client
     int bytes_recvd = recv(sd, request, request_buffer_size - 1, 0);
 
     if (bytes_recvd < 0) {
@@ -193,14 +175,25 @@ void handleHttpRequest(int sd) {
 
     char *requestType;
     requestType = strtok(request, " ");
+    logger(requestType, 2);
+
     char *path;
     path = strtok(NULL, " ");
+    logger(path, 2);
 
-    FILE *fptr = fopen("./index.html", "r");
-
-    if (strlen(path) >= 1) {
+    if (strlen(path) > 1) {
         readFilePath(path, sd);
     } else {
+        // send root/index
+        FILE *fptr = fopen("/pages/index.html", "r");
+
+        size_t read_bytes;
+        while ((read_bytes = fread(response, 1, BUFSIZ, fptr)) > 0) {
+            send(sd, response, read_bytes, 0);
+        }
+        logger("index", 2);
+        fclose(fptr);
+        return;
     }
 }
 
@@ -208,7 +201,7 @@ static void skelly_daemon() {
     logger("Daemonizing starting", 2);
     pid_t pid;
     pid = fork(); // fork of process
-    
+
     if (pid < 0) { // an error with forking
         logger("Forking failed", 0);
         exit(EXIT_FAILURE);
@@ -282,7 +275,7 @@ int web_service() {
     lok_adr.sin_family = AF_INET;
     lok_adr.sin_port = htons((u_short)LOCAL_PORT);
     lok_adr.sin_addr.s_addr = htonl(INADDR_ANY);
-    
+
     // Kobler sammen socket og lokal adresse
     if (bind(sd, (struct sockaddr *)&lok_adr, sizeof(lok_adr)) == 0) {
         perror("bind");
@@ -294,15 +287,11 @@ int web_service() {
 
         logger(buf, 2);
     } else {
-        exit(1);
         logger("Failed to bind", 0);
+        exit(1);
     }
 
     chroot("/var/www/");
-    //int errVal = chroot("/var/www/");
-    //if (errVal < 0) {
-    //    perror("/var/www/");
-    //}
 
     privilege(); // root seperasjon
     logger("Waiting for request", 2);
@@ -330,7 +319,7 @@ int web_service() {
     return 0;
 }
 
-int main() {         // the magic
+int main() { // the magic
     FILE *log_file;
     log_file = fopen("/var/log/log.txt", "a");
     dup2(fileno(log_file), STDERR_FILENO);
