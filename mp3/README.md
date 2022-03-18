@@ -74,7 +74,7 @@ Respons:
 
 ### Slette ett dikt
 ```
-Url: https://localhost/cgi-bin/diktbase.cgi/dikt
+Url: https://localhost/cgi-bin/diktbase.cgi/dikt/$id
 Metode: DELETE
 Bodyparameter: ""
 Header: Content-type: application/xml
@@ -83,7 +83,7 @@ Respons: <response><status></status><statustext></statustext><sessionid></sessio
 
 ### Slette alle egne dikt
 ```
-Url: https://localhost/cgi-bin/diktbase.cgi/dikt/$id
+Url: https://localhost/cgi-bin/diktbase.cgi/dikt
 Metode: DELETE
 Bodyparameter: ""
 Header: Content-type: application/xml
