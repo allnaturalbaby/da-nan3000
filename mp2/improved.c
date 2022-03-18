@@ -118,6 +118,11 @@ int readFilePath(char *fileName, int sd) {
     strcat(pagesPath, fileName);
 
     fptr = fopen(pagesPath, "r");
+    if (fptr == NULL) {
+        perror("failed to open");
+        logger("failed", 2);
+        fflush(stderr);
+    }
 
     responseHeader = getResponseHeaderFromMimeType(mimeType, pagesPath);
 
