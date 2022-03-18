@@ -22,7 +22,7 @@ echo "HTTP_COOKIE:" $HTTP_COOKIE
 
 function checkIfLoggedIn() {
 
-	cookieSessionId="199dc93d-7ad0-443e-a4af-ebcd1bda82d7"
+	cookieSessionId="s199dc93d-7ad0-443e-a4af-ebcd1bda82d7"
 
 	databaseSession=$(sqlite3 $database_path "SELECT * FROM sesjon WHERE sesjonsID = '$cookieSessionId';")
 
@@ -91,124 +91,146 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
 	IFS='\' #Reset delimeter
 
 
-
+	if [ $isLoggedIn = 0 ]; then
 	#Login
-	if [ ${url_array[3]} = "login" -a $isLoggedIn = 0 ]; then
+		if [ ${url_array[3]} = "login" ]; then
 
-		xmlInput=$BODY
-        username=$(xmllint --xpath "//username/text()" - <<<"$xmlInput") # Parsing xml user
-        password=$(xmllint --xpath "//password/text()" - <<<"$xmlInput") # Parsing xml password
-	
-
-		user=$(sqlite3 $database_path "SELECT * FROM bruker WHERE epostadresse='$username';")
+			xmlInput=$BODY
+			username=$(xmllint --xpath "//username/text()" - <<<"$xmlInput") # Parsing xml user
+			password=$(xmllint --xpath "//password/text()" - <<<"$xmlInput") # Parsing xml password
 		
 
-		if [ -z $user ]; then	#If user does not exist
-			response="<?xml version="1.0"?>"
-			response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
-			response+="<response><status>0</status><statustext>Brukernavn eller passord er feil</statustext><sessionid></sessionsid><user></user></response>"
-			length=${#response}
-			echo "Content-Length: "$length
-			echo
-			echo $response
+			user=$(sqlite3 $database_path "SELECT * FROM bruker WHERE epostadresse='$username';")
+			
+
+			if [ -z $user ]; then	#If user does not exist
+				response="<?xml version="1.0"?>"
+				response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
+				response+="<response><status>0</status><statustext>Brukernavn eller passord er feil</statustext><sessionid></sessionsid><user></user></response>"
+				length=${#response}
+				echo "Content-Length: "$length
+				echo
+				echo $response
 
 
-		else					#If user exist
-			IFS='|'
-			read userEmail userPassword userFname userLname <<< "$user"
-			IFS='\'
+			else					#If user exist
+				IFS='|'
+				read userEmail userPassword userFname userLname <<< "$user"
+				IFS='\'
 
-			currentUser=$userEmail
-			currentUserPassword=$userPassword
+				currentUser=$userEmail
+				currentUserPassword=$userPassword
 
-			hashpassword=$(echo -n $password | sha512sum | head -n 1 )
+				hashpassword=$(echo -n $password | sha512sum | head -n 1 )
 
-			if [ $hashpassword = $currentUserPassword ]; then		#If password is correct
-				sessionId=$(uuidgen -r)	
-				
-				existingSessions=$(sqlite3 $database_path "SELECT sesjonsID FROM sesjon WHERE sesjonsID='$sessionId';")
-				doesSessionExist=${#existingSessions}
+				if [ $hashpassword = $currentUserPassword ]; then		#If password is correct
+					sessionId=$(uuidgen -r)	
+					
+					existingSessions=$(sqlite3 $database_path "SELECT sesjonsID FROM sesjon WHERE sesjonsID='$sessionId';")
+					doesSessionExist=${#existingSessions}
 
-				if [ $doesSessionExist = 0 ]; then				#If sessionId does not exist 
-					sqlite3 $database_path "INSERT INTO sesjon (sesjonsID,epostadresse) \
-					VALUES(\"$sessionId\",\"$currentUser\");"
+					if [ $doesSessionExist = 0 ]; then				#If sessionId does not exist 
+						sqlite3 $database_path "INSERT INTO sesjon (sesjonsID,epostadresse) \
+						VALUES(\"$sessionId\",\"$currentUser\");"
 
-					echo "Set-Cookie:my_cookie=$sessionId"
-					echo
+						echo "Set-Cookie:my_cookie=$sessionId"
+						echo
 
-					echo "Cookie:" $HTTP_COOKIE
+						echo "Cookie:" $HTTP_COOKIE
 
+						response="<?xml version="1.0"?>"
+						response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
+						response+="<response><status>1</status><statustext>Du er logget inn</statustext><sessionid>"$sessionId"</sessionid><user>"$currentUser"</user></response>"
+						length=${#response}
+						echo "Content-Length: "$length
+						echo
+						echo $response
+
+					else	#If sessionId does exist, so duplicates doesn't happen
+						response="<?xml version="1.0"?>"
+						response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
+						response+="<response><status>0</status><statustext>Noe gikk galt, prøv igjen</statustext><sessionid></sessionid><user></user></response>"
+						length=${#response}
+						echo "Content-Length: "$length
+						echo
+						echo $response
+					fi
+
+				else	#If password is not correct
 					response="<?xml version="1.0"?>"
 					response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
-					response+="<response><status>1</status><statustext>Du er logget inn</statustext><sessionid>"$sessionId"</sessionid><user>"$currentUser"</user></response>"
-					length=${#response}
-					echo "Content-Length: "$length
-					echo
-					echo $response
-
-				else	#If sessionId does exist, so duplicates doesn't happen
-					response="<?xml version="1.0"?>"
-					response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
-					response+="<response><status>0</status><statustext>Noe gikk galt, prøv igjen</statustext><sessionid></sessionid><user></user></response>"
+					response+="<response><status>0</status><statustext>Brukernavn eller passord er feil</statustext><sessionid></sessionid><user></user></response>"
 					length=${#response}
 					echo "Content-Length: "$length
 					echo
 					echo $response
 				fi
-
-			else	#If password is not correct
-				response="<?xml version="1.0"?>"
-				response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
-				response+="<response><status>0</status><statustext>Brukernavn eller passord er feil</statustext><sessionid></sessionid><user></user></response>"
-				length=${#response}
-				echo "Content-Length: "$length
-				echo
-				echo $response
 			fi
 		fi
-
-	#Logg ut
-	elif [ ${url_array[3]} = 'logout' -a $isLoggedIn = 1 ]; then
-
-		xmlInput=$BODY
-        loggedInSessionId=$(xmllint --xpath "//sessionid/text()" - <<<"$xmlInput") #Getting sessionid from bodyparameter in xml
-
-		echo $loggedInSessionId
-
-		sqlite3 $database_path "DELETE FROM sesjon WHERE sesjonsID='$loggedInSessionId';"
-
+	else 
 		response="<?xml version="1.0"?>"
 		response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
-		response+="<response><status>1</status><statustext>Bruker logget ut</statustext><sessionid>"$currentSessionId"</sessionid><user>"$currentEmail"</user></response>"
+		response+="<response><status>0</status><statustext>Bruker allerede logget inn</statustext><sessionid>"$currentSessionId"</sessionid><user>"$currentUser"</user></response>"
 		length=${#response}
 		echo "Content-Length: "$length
 		echo
 		echo $response
-	
+	fi
 
-	#Lage nytt dikt
-	elif [ ${url_array[3]} = "dikt" -a $isLoggedIn = 1 ]; then	#Post to make new poem localhost/cgi-bin/diktbase.cgi/dikt
+
+	if [ $isLoggedIn = 1 ]; then
+
+		#Logg ut
+		if [ ${url_array[3]} = 'logout' ]; then
+
+			xmlInput=$BODY
+			loggedInSessionId=$(xmllint --xpath "//sessionid/text()" - <<<"$xmlInput") #Getting sessionid from bodyparameter in xml
+
+			echo $loggedInSessionId
+
+			sqlite3 $database_path "DELETE FROM sesjon WHERE sesjonsID='$loggedInSessionId';"
+
+			response="<?xml version="1.0"?>"
+			response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
+			response+="<response><status>1</status><statustext>Bruker logget ut</statustext><sessionid>"$currentSessionId"</sessionid><user>"$currentEmail"</user></response>"
+			length=${#response}
+			echo "Content-Length: "$length
+			echo
+			echo $response
 		
-		xmlInput=$BODY													
-		newPoem=$(xmllint --xpath "//text/text()" - <<<"$xmlInput")		#Getting new poem from bodyparameter in xml
+
+		#Lage nytt dikt
+		elif [ ${url_array[3]} = "dikt" ]; then	#Post to make new poem localhost/cgi-bin/diktbase.cgi/dikt
+			
+			xmlInput=$BODY													
+			newPoem=$(xmllint --xpath "//text/text()" - <<<"$xmlInput")		#Getting new poem from bodyparameter in xml
 
 
-		lastId=$(sqlite3 $database_path "SELECT diktID FROM dikt ORDER BY diktID DESC LIMIT 1;")	#Getting last id that exists
-		let "newId = $lastId + 1"																	#Making new id from last id
+			lastId=$(sqlite3 $database_path "SELECT diktID FROM dikt ORDER BY diktID DESC LIMIT 1;")	#Getting last id that exists
+			let "newId = $lastId + 1"																	#Making new id from last id
 
-		sqlite3 $database_path "INSERT INTO dikt VALUES('$newId', '$newPoem', 'norasophie96@hotmail.com');"	#Inserting the new poem
+			sqlite3 $database_path "INSERT INTO dikt VALUES('$newId', '$newPoem', 'norasophie96@hotmail.com');"	#Inserting the new poem
 
+			response="<?xml version="1.0"?>"
+			response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
+			response+="<response><status>1</status><statustext>Nytt dikt lagret</statustext><sessionid>"$currentSessionId"</sessionid><user>"$currentEmail"</user></response>"
+			length=${#response}
+			echo "Content-Length: "$length
+			echo
+			echo $response
+		else	
+			response="<?xml version="1.0"?>"
+			response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
+			response+="<response><status>0</status><statustext>Feil adresse</statustext><sessionid></sessionid><user></user></response>"
+			length=${#response}
+			echo "Content-Length: "$length
+			echo
+			echo $response
+		fi
+	else
 		response="<?xml version="1.0"?>"
 		response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
-		response+="<response><status>1</status><statustext>Nytt dikt lagret</statustext><sessionid>"$currentSessionId"</sessionid><user>"$currentEmail"</user></response>"
-		length=${#response}
-		echo "Content-Length: "$length
-		echo
-		echo $response
-	else	
-		response="<?xml version="1.0"?>"
-		response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
-		response+="<response><status>0</status><statustext>Feil adresse</statustext><sessionid></sessionid><user></user></response>"
+		response+="<response><status>0</status><statustext>Bruker må være logget inn for å gjennomføre denne handlingen</statustext><sessionid></sessionid><user></user></response>"
 		length=${#response}
 		echo "Content-Length: "$length
 		echo
@@ -252,6 +274,14 @@ if [ "$REQUEST_METHOD" = "PUT" ]; then
 			echo
 			echo $response
 		fi
+	else
+		response="<?xml version="1.0"?>"
+		response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
+		response+="<response><status>0</status><statustext>Bruker må være logget inn for å gjennomføre denne handlingen</statustext><sessionid></sessionid><user></user></response>"
+		length=${#response}
+		echo "Content-Length: "$length
+		echo
+		echo $response
 	fi
 fi
 
@@ -304,6 +334,14 @@ if [ "$REQUEST_METHOD" = "DELETE" ]; then
 			echo
 			echo $response
 		fi
+	else 
+		response="<?xml version="1.0"?>"
+		response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
+		response+="<response><status>0</status><statustext>Bruker må være logget inn for å gjennomføre denne handlingen</statustext><sessionid></sessionid><user></user></response>"
+		length=${#response}
+		echo "Content-Length: "$length
+		echo
+		echo $response
 	fi
 fi
 
