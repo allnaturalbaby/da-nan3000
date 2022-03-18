@@ -5,6 +5,8 @@ UID is set to 1000, your local user.
 
 ## Commands
 
+```sudo ./start.sh {MP} ``` - shortcut to do all of the commands below automated (except nc)
+
 ```gcc improved.c -o improved ``` - compile the program
 
 ```sudo ./improved ``` - start the daemon
