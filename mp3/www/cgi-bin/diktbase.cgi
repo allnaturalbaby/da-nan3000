@@ -135,11 +135,6 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
 						sqlite3 $database_path "INSERT INTO sesjon (sesjonsID,epostadresse) \
 						VALUES(\"$sessionId\",\"$currentUser\");"
 
-						echo "Set-Cookie:my_cookie=$sessionId"
-						echo
-
-						echo "Cookie:" $HTTP_COOKIE
-
 						response="<?xml version="1.0"?>"
 						response+="<!DOCTYPE response SYSTEM "http://localhost/response.dtd">"
 						response+="<response><status>1</status><statustext>Du er logget inn</statustext><sessionid>"$sessionId"</sessionid><user>"$currentUser"</user></response>"
