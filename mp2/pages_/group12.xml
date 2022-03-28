@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="xml-style.css"?>
 <group12>
     <member>
-        <name>Viktor</name>
-        <age>Old</age>
-        <gender>Male</gender>
+        <name>Name: Viktor</name>
+        <age>Age: Old</age>
+        <gender>Gender: Male</gender>
     </member>
     <member>
-        <name>Christian</name>
-        <age>Old</age>
-        <gender>Unknown</gender>
+        <name>Name: Christian</name>
+        <age>Age: Old</age>
+        <gender>Gender: Unknown</gender>
     </member>
     <member>
-        <name>Nora</name>
-        <age>Old</age>
-        <gender>Female</gender>
+        <name>Name: Nora</name>
+        <age>Age: Old</age>
+        <gender>Gender: Female</gender>
     </member>
     <member>
-        <name>Håkon</name>
-        <age>Perfect</age>
-        <gender>Beta male</gender>
+        <name>Name: Håkon</name>
+        <age>Age: Perfect</age>
+        <gender>Gender: Beta male</gender>
     </member>
 </group12>
