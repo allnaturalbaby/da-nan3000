@@ -1,0 +1,11 @@
+docker build -t my-apache2 .
+docker run -dit --name my-running-app -p 8080:80 my-apache2
+
+Sudo docker ps -a (list dead container)
+sudo docker rm -f Names (fjerner dø container)
+
+sudo docker-compose up -d (detached)
+
+
+SSH inn i docker container, 
+docker exec -it "ContainerName" /bin/bash
