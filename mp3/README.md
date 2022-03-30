@@ -49,7 +49,7 @@ Respons: <response><status></status><statustext></statustext><sessionid></sessio
 ```
 Url: https://localhost/cgi/bin/diktbase.cgi/logout
 Metode: POST
-Bodyparameter: <user><sessionid></sessionid><user> 
+Bodyparameter: ""
 Header: Content-type: application/xml
 Respons: <response><status></status><statustext></statustext><sessionid></sessionid><user></user></response>
 ```
@@ -58,7 +58,7 @@ Respons: <response><status></status><statustext></statustext><sessionid></sessio
 ```
 Url: https://localhost/cgi-bin/diktbase.cgi/dikt
 Metode: POST
-Bodyparameter: <dikt><text></text></dikt>
+Bodyparameter: <dikt><tekst></tekst></dikt>
 Header: Content-type: application/xml
 Respons: <response><status></status><statustext></statustext><sessionid></sessionid><user></user></response>
 ```
@@ -67,7 +67,7 @@ Respons: <response><status></status><statustext></statustext><sessionid></sessio
 ```
 Url: https://localhost/cgi-bin/diktbase.cgi/dikt/$id
 Metode: PUT
-Bodyparameter: <dikt><text></text></dikt>
+Bodyparameter: <dikt><tekst></tekst></dikt>
 Header: Content-type: application/xml
 Respons: 
 ```
