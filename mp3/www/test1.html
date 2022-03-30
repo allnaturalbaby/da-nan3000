@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="test.css">
+    <title>Document</title>
+</head>
+<body onload="{getAllPoems(); getOnePoem();}">
+    <h1>Hei og velkommen til denne kule siden jeg prøver å lage for det kule prosjektet i DA-NAN</h1>
+    <br>
+    <h1>Innlogget bruker: EPOST</h1>
+    <br>
+        <input type="button" value="Logg ut" onclick="logout()">
+    <br>
+    <br>
+    <form>
+        <input class="addPoemInput" type="text" id="addPoem" placeholder="Skriv ønsket dikt her">
+        <input class="addPoemButton" type="button" value="Legg til dikt" onclick="addNewPoem()">
+    </form>
+    <br>
+    <br>
+    <form>
+        <input type="text" placeholder="Dikt ID" id="poemId">
+        <input type="text" placeholder="Skriv diktet du vil endre til her" id="changedPoem">
+        <input type="button" value="Endre dikt" onclick="changePoem()">
+    </form>
+    <br>
+    <br>
+    <form>
+        <input type="text" placeholder="Dikt ID" id="poemIdForDelete">
+        <input type="button" value="Slett dikt" onclick="deleteOnePoem()">
+    </form>
+    <br>
+    <br>
+    <form>
+        <input type="button" value="Slett alle dikt som tilhører deg" onclick="deleteAllMyPoems()">
+    </form>
+    <br>
+    <br>
+    <div id="alleDikt"></div>
+    <br>
+    <div id="ettDikt"></div>
+    <br>
+    <script src="test.js"></script>
+</body>
+</html>

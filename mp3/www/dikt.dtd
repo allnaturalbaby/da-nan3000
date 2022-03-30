@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE dikt [
-<!ELEMENT dikt (text)>
-<!ELEMENT text (#PCDATA)>
+<!ELEMENT dikt (tekst)>
+<!ELEMENT tekst (#PCDATA)>
 ]>
