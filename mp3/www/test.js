@@ -64,11 +64,18 @@ function getAllPoems() {
 
 function showChangePoem(id, dikt) {
     document.getElementById("showChangePoem").innerHTML+=
-    `<form class='endreDiktForm>
-        <textarea class='endreDiktInput' rows='5' cols='60' id='changedPoem'>${dikt}</textarea>
-        <input class='slettDiktButton' type='button' value='Endre dikt' onclick='changePoem(${id})'>
+    `<form class='endreDiktForm'>
+        <textarea class='diktInput' rows='5' cols='60' id='changedPoem' spellcheck='false'>${dikt}</textarea>
+        <input class='slettDiktButton' type='button' value='Lagre endringer' onclick='changePoem(${id})'>
     </form>`
-    
+}
+
+function showMakeNewPoem() {
+    document.getElementById("showMakeNewPoem").innerHTML+=
+    `<form class='endreDiktForm'>
+        <textarea class='diktInput' rows='5' cols='60' id='addPoem' spellcheck='false'></textarea>
+        <input class='slettDiktButton' type='button' value='Lagre dikt' onclick='addNewPoem()'> 
+    </form>`
 }
 
 function getOnePoem() { //Endre slik at bruker bestemmer id som dikt skal ha som også i lenger ned bytte ut med
@@ -105,33 +112,34 @@ function getOnePoem() { //Endre slik at bruker bestemmer id som dikt skal ha som
     })
 }
 
-function login() {
+function login(event) {
+    if (event.keyCode == 13 || event == "login")  {
 
-    let username = document.getElementById("username").value;
-    let password = document.getElementById("password").value;
-    
-    fetch(`${myUrl}login`, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: "<user><username>"+username+"</username><password>"+password+"</password></user>"
-    })
-    .then(response => response.text())
-    .then(data => {
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(data, 
-            "application/xml")
-        const callStatus = xml.getElementsByTagName("status")[0].textContent;
-        loggedInEmail = xml.getElementsByTagName("user")[0].textContent;
+        let username = document.getElementById("username").value;
+        let password = document.getElementById("password").value;
         
-        if (callStatus == 1) {
-            window.location = "test1.html";
-            localStorage["loggedInEmail"] = loggedInEmail;
-            sessionStorage.setItem('status','loggedIn');
-        } else {
-            alert("Something went wrong");
-        }
-        
-    })
+        fetch(`${myUrl}login`, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: "<user><username>"+username+"</username><password>"+password+"</password></user>"
+        })
+        .then(response => response.text())
+        .then(data => {
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(data, 
+                "application/xml")
+            const callStatus = xml.getElementsByTagName("status")[0].textContent;
+            loggedInEmail = xml.getElementsByTagName("user")[0].textContent;
+            
+            if (callStatus == 1) {
+                window.location = "test1.html";
+                localStorage["loggedInEmail"] = loggedInEmail;
+                sessionStorage.setItem('status','loggedIn');
+            } else {
+                alert("Something went wrong");
+            }
+        })
+    }
 }
 
 function getUsername() {
@@ -234,21 +242,23 @@ function deleteOnePoem(id) {
 
 function deleteAllMyPoems() {
 
-    fetch(`${myUrl}dikt`, {
-        method: 'DELETE',
-    })
-    .then(response => response.text())
-    .then(data => {
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(data, 
-            "application/xml")
-        const callStatus = xml.getElementsByTagName("status")[0].textContent;
-        if (callStatus == 1) {
-            location.reload();
-        } else {
-            alert("Something went wrong");
-        } 
-    })
+    if (confirm("Er du sikker på at du vil slette alle dine dikt?") == true) {
+        fetch(`${myUrl}dikt`, {
+            method: 'DELETE',
+        })
+        .then(response => response.text())
+        .then(data => {
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(data, 
+                "application/xml")
+            const callStatus = xml.getElementsByTagName("status")[0].textContent;
+            if (callStatus == 1) {
+                location.reload();
+            } else {
+                alert("Something went wrong");
+            } 
+        })
+    } 
 }
 
 
