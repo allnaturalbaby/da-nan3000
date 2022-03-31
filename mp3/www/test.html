@@ -8,23 +8,25 @@
     <title>Document</title>
 </head>
 <body onload="{getAllPoems(); getOnePoem();}">
-    <h1>Hei og velkommen til denne kule siden jeg prøver å lage for det kule prosjektet i DA-NAN</h1>
-    <h2>Dette er en test for å sjekke fargen</h2>
-    <br>
-    <form>
-        <input type="email" placeholder="Epost" id="username">
-        <input type="password" placeholder="Passord" id="password">
-        <input type="button" value="Logg inn" onclick="login()">
-    </form>
-    <form>
-    <input type="button" value="Logg ut" onclick="logout()">
-    </form>
+    <div class="topdiv">
+        <h1 class="headline">Gruppe 12 sin diktbase</h1>
+        <div class="userInfoDiv">
+            
+            <form class="loginForm">
+                <h4>Logg inn for å gjøre endringer</h4>
+                <input class="loginInput" type="email" placeholder="Epost" id="username">
+                <input class="loginInput" type="password" placeholder="Passord" id="password">
+                <input class="button" type="button" value="Logg inn" onclick="login()">
+            </form>
+        </div>
+    </div>
     <br>
     
     <br>
+    <h2>Alle dikt:</h2>
     <div id="alleDikt"></div>
     <br>
-    <div id="ettDikt"></div>
+    
     <br>
     <script src="test.js"></script>
 </body>

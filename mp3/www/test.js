@@ -1,5 +1,13 @@
 let myUrl = 'http://localhost/cgi-bin/diktbase.cgi/';
+let loggedInEmail = "";
 
+function checkIfLoggedIn() {
+    if (sessionStorage.getItem('status') != '') {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 function getAllPoems() {
     
@@ -13,26 +21,54 @@ function getAllPoems() {
         const xml = parser.parseFromString(data, 
             "application/xml")
         const count = xml.getElementsByTagName("dikt").length
+        const noe = document?.getElementById("userLoggedIn")?.textContent;
+        console.log(noe);
+        let deletePoem;
+        let doChangePoem;
         document.getElementById("alleDikt").innerHTML+=
-            "<table id='test'>\
-            <tr>\
-            <td class='diktID'>Dikt ID</td>\
-            <td class='tekst'>Dikt</td>\
-            <td class='epost'>Eier av dikt</td>\
-            </tr>\
-            </table>"
-        for (var i = 0; i < count; i++){
-            const id = xml.getElementsByTagName("diktID")[i].childNodes[0].nodeValue;
-            const tekst = xml.getElementsByTagName("tekst")[i].childNodes[0].nodeValue;
-            const epost = xml.getElementsByTagName("epostadresse")[i].childNodes[0].nodeValue;
-            document.getElementById("test").innerHTML += 
-                "<tr class='jupp'>\
-                    <td class='diktID'>"+id+"</td>\
-                    <td class='tekst'>"+tekst+"</td>\
-                    <td class='epost'>"+epost+"</td>\
-                </tr>"
+            `<table id='test'>
+            <tr>
+            <td class='diktID'>Dikt ID</td>
+            <td class='tekst'>Dikt</td>
+            <td class='epost'>Eier av dikt</td>
+            <td class='slettDikt'>Slett dikt</td>
+            <td class='slettDikt'>Endre dikt</td>
+            </tr>
+            </table>`
+        if (count > 0) {
+            for (var i = 0; i < count; i++){
+                const id = xml.getElementsByTagName("diktID")[i].childNodes[0].nodeValue;
+                const tekst = xml.getElementsByTagName("tekst")[i].childNodes[0].nodeValue;
+                const epost = xml.getElementsByTagName("epostadresse")[i].childNodes[0].nodeValue;
+                if (noe === epost) {
+                    deletePoem = `<input type='button' class='slettDiktButton'
+                    value='Slett dikt' onClick='deleteOnePoem(${id})'>`;
+                    doChangePoem = `<input type='button' class='slettDiktButton' 
+                    value='Endre dikt' onClick='showChangePoem(${id}, "${tekst}")'>`;
+                } else {
+                    deletePoem = "";
+                    doChangePoem= "";
+                }
+                document.getElementById("test").innerHTML += 
+                    `<tr class='jupp'>
+                        <td class='diktID'>${id}</td>
+                        <td class='tekst'>${tekst}</td>
+                        <td class='epost'>${epost}</td>
+                        <td class='slettDikt'>${deletePoem}</td>
+                        <td class='slettDikt'>${doChangePoem}</td>
+                    </tr>`
+            }
         }
     })
+}
+
+function showChangePoem(id, dikt) {
+    document.getElementById("showChangePoem").innerHTML+=
+    `<form class='endreDiktForm>
+        <textarea class='endreDiktInput' rows='5' cols='60' id='changedPoem'>${dikt}</textarea>
+        <input class='slettDiktButton' type='button' value='Endre dikt' onclick='changePoem(${id})'>
+    </form>`
+    
 }
 
 function getOnePoem() { //Endre slik at bruker bestemmer id som dikt skal ha som også i lenger ned bytte ut med
@@ -48,23 +84,23 @@ function getOnePoem() { //Endre slik at bruker bestemmer id som dikt skal ha som
             "application/xml")
         const count = xml.getElementsByTagName("dikt").length
         document.getElementById("ettDikt").innerHTML+=
-            "<table id='test2'>\
-            <tr>\
-            <td class='diktID'>Dikt ID</td>\
-            <td class='tekst'>Dikt</td>\
-            <td class='epost'>Eier av dikt</td>\
-            </tr>\
-            </table>"
+            `<table id='test2'>
+            <tr>
+            <td class='diktID'>Dikt ID</td>
+            <td class='tekst'>Dikt</td>
+            <td class='epost'>Eier av dikt</td>
+            </tr>
+            </table>`
         for (var i = 0; i < count; i++){
             const id = xml.getElementsByTagName("diktID")[i].childNodes[0].nodeValue;
             const tekst = xml.getElementsByTagName("tekst")[i].childNodes[0].nodeValue;
             const epost = xml.getElementsByTagName("epostadresse")[i].childNodes[0].nodeValue;
             document.getElementById("test2").innerHTML += 
-                "<tr class='jupp'>\
-                    <td class='diktID'>"+id+"</td>\
-                    <td class='tekst'>"+tekst+"</td>\
-                    <td class='epost'>"+epost+"</td>\
-                </tr>"
+                `<tr class='jupp'>
+                    <td class='diktID'>${id}</td>
+                    <td class='tekst'>${tekst}</td>
+                    <td class='epost'>${epost}</td>
+                </tr>`
         }
     })
 }
@@ -85,8 +121,11 @@ function login() {
         const xml = parser.parseFromString(data, 
             "application/xml")
         const callStatus = xml.getElementsByTagName("status")[0].textContent;
+        loggedInEmail = xml.getElementsByTagName("user")[0].textContent;
+        
         if (callStatus == 1) {
             window.location = "test1.html";
+            localStorage["loggedInEmail"] = loggedInEmail;
             sessionStorage.setItem('status','loggedIn');
         } else {
             alert("Something went wrong");
@@ -95,6 +134,10 @@ function login() {
     })
 }
 
+function getUsername() {
+    let user = localStorage["loggedInEmail"];
+    document.getElementById("userLoggedIn").innerHTML+=user;
+}
 
 
 function logout() {
@@ -145,11 +188,13 @@ function addNewPoem() {
 
 }
 
-function changePoem() {
-    let changedPoem = document.getElementById("changedPoem").value;
-    let poemId = document.getElementById("poemId").value;
 
-    fetch(`${myUrl}dikt/${poemId}`, {
+
+function changePoem(id) {
+    let changedPoem = document.getElementById("changedPoem").value;
+    //let poemId = document.getElementById("poemId").value;
+
+    fetch(`${myUrl}dikt/${id}`, {
         method: 'PUT',
         body: "<dikt><tekst>"+changedPoem+"</tekst></dikt>"
     })
@@ -167,10 +212,10 @@ function changePoem() {
     })
 }
 
-function deleteOnePoem() {
-    let poemIdForDelete = document.getElementById("poemIdForDelete").value;
+function deleteOnePoem(id) {
+    //let poemIdForDelete = document.getElementById("poemIdForDelete").value;
 
-    fetch(`${myUrl}dikt/${poemIdForDelete}`, {
+    fetch(`${myUrl}dikt/${id}`, {
         method: 'DELETE',
     })
     .then(response => response.text())
@@ -208,10 +253,4 @@ function deleteAllMyPoems() {
 
 
 
-function checkIfLoggedIn() {
-    if (sessionStorage.getItem('status') != '') {
-        return true;
-    } else {
-        return false;
-    }
-}
+

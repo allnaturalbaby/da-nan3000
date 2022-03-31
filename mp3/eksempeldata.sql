@@ -1,6 +1,6 @@
 /* Passord er SHA-512 hash*/
 INSERT INTO bruker VALUES(
-    "norasophie96@hotmail.com", 
+    "nora@hvcn.com", 
     "b25a1d2c398add3b7509ebe359496706d782234d8ecc5b361eb6caeca7b9eb89e3aab45e8cf6bbfe07eed48745781fbc6366a4b6e4b236d48267f6f3d8e20b6a  -", 
     "Nora Sophie", "Backe"); 
     /* Passord: Passord1 */
@@ -28,8 +28,7 @@ INSERT INTO bruker VALUES(
     /* Passord: Passord4 */
 
 
-INSERT INTO dikt VALUES(1, "Dette er et hyggelig dikt", "norasophie96@hotmail.com");
-INSERT INTO dikt VALUES(2, "Dette er et sint dikt", "chris@hvcn.com");
-INSERT INTO dikt VALUES(3, "Dette er et glad dikt", "norasophie96@hotmail.com");
-INSERT INTO dikt VALUES(4, "Dette er et trist dikt", "viktor@hvcn.com");
-INSERT INTO dikt VALUES(5, "Dette er et slemt dikt", "hevos@hvcn.com");
+INSERT INTO dikt VALUES(1, "For å komme seg bort fra mas og stress, er det en ting som gjelder; vinterdress, for hva er vel bedre for hjerte og lunger, enn å base i snøen som et par unger.", "nora@hvcn.com");
+INSERT INTO dikt VALUES(2, "Roser er røde, Fioler er blå, de fleste dikt rimer, men hvorfor være som alle de andre?", "chris@hvcn.com");
+INSERT INTO dikt VALUES(3, "Jeg står og graver, du står og graver, hun står og graver, han står og graver, vi står og graver, de står og graver. Dette er ikke et vakkert dikt. Men det er veldig dypt.", "hevos@hvcn.com");
+INSERT INTO dikt VALUES(4, "Med øynene fulle av tårer står jeg her og tenker på deg jeg skulle ønske du var her nå og kunne kutte denne løken for meg", "viktor@hvcn.com");
