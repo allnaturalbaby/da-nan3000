@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="test.css">
     <title>Document</title>
 </head>
-<body onload="{getAllPoems(); getOnePoem(); getUsername();}">
+<body onload="{getAllPoems(); getUsername();}">
     <div class="topdiv">
         <h1 class="headline">Gruppe 12 sin diktbase</h1>
         <div class="userInfoDiv">
@@ -18,10 +18,14 @@
     <form>
         <input class="slettDiktButton" type="button" value="Lag nytt dikt" onclick="showMakeNewPoem()">
         <input class="slettDiktButton" type="button" value="Slett alle egne dikt" onclick="deleteAllMyPoems()">
+        <input class="idInputField" type="text" placeholder="Dikt ID" value="" id="diktId">
+        <input class="findPoemButton" type="button" value="Finn dikt" onclick="getOnePoem()">
     </form>
     <br>
     <div id="showChangePoem"></div>
     <div id="showMakeNewPoem"></div>
+    <br>
+    <div id="ettDikt"></div>
     <br>
     <div id="alleDikt"></div>
     <br>

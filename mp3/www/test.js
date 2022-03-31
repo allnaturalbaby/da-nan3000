@@ -11,6 +11,7 @@ function checkIfLoggedIn() {
 
 function getAllPoems() {
     
+    //Get kall for å hente alle dikt
     fetch(`${myUrl}dikt/`, {
         method: 'GET',
         Origin: 'http://localhost'
@@ -20,11 +21,21 @@ function getAllPoems() {
         const parser = new DOMParser();
         const xml = parser.parseFromString(data, 
             "application/xml")
+
+        //Teller antall dikt 
         const count = xml.getElementsByTagName("dikt").length
-        const noe = document?.getElementById("userLoggedIn")?.textContent;
-        console.log(noe);
+
+        //Henter epost til innlogget bruker
+        const userEmail = document?.getElementById("userLoggedIn")?.textContent;
+
+        //Variabler som skal bruker til å vise slette og endre dikt knapper
         let deletePoem;
         let doChangePoem;
+
+        //Sjekker om det er dikt i databasen
+        if (count > 0) {
+
+        //Sender dokument med html som viser overskriftene
         document.getElementById("alleDikt").innerHTML+=
             `<table id='test'>
             <tr>
@@ -35,12 +46,17 @@ function getAllPoems() {
             <td class='slettDikt'>Endre dikt</td>
             </tr>
             </table>`
-        if (count > 0) {
+
+            //Looper gjennom alle diktene for å vise alle
             for (var i = 0; i < count; i++){
+
+                //Henter ut id, dikt og epost til hver av diktene
                 const id = xml.getElementsByTagName("diktID")[i].childNodes[0].nodeValue;
                 const tekst = xml.getElementsByTagName("tekst")[i].childNodes[0].nodeValue;
                 const epost = xml.getElementsByTagName("epostadresse")[i].childNodes[0].nodeValue;
-                if (noe === epost) {
+
+                //Hvis innlogget bruker er samme som eier av dikt vis knappene, hvis ikke, ikke vis dem
+                if (userEmail === epost) {
                     deletePoem = `<input type='button' class='slettDiktButton'
                     value='Slett dikt' onClick='deleteOnePoem(${id})'>`;
                     doChangePoem = `<input type='button' class='slettDiktButton' 
@@ -49,8 +65,10 @@ function getAllPoems() {
                     deletePoem = "";
                     doChangePoem= "";
                 }
+
+                //Sender dokument med html med alle diktene i databasen
                 document.getElementById("test").innerHTML += 
-                    `<tr class='jupp'>
+                    `<tr>
                         <td class='diktID'>${id}</td>
                         <td class='tekst'>${tekst}</td>
                         <td class='epost'>${epost}</td>
@@ -62,15 +80,19 @@ function getAllPoems() {
     })
 }
 
-function showChangePoem(id, dikt) {
+function showChangePoem(showChangePoemId, dikt) {
+    document.getElementById("showMakeNewPoem").innerHTML=""
+    document.getElementById("showChangePoem").innerHTML=""
     document.getElementById("showChangePoem").innerHTML+=
     `<form class='endreDiktForm'>
         <textarea class='diktInput' rows='5' cols='60' id='changedPoem' spellcheck='false'>${dikt}</textarea>
-        <input class='slettDiktButton' type='button' value='Lagre endringer' onclick='changePoem(${id})'>
+        <input class='slettDiktButton' type='button' value='Lagre endringer' onclick='changePoem(${showChangePoemId})'>
     </form>`
 }
 
 function showMakeNewPoem() {
+    document.getElementById("showChangePoem").innerHTML=""
+    document.getElementById("showMakeNewPoem").innerHTML=""
     document.getElementById("showMakeNewPoem").innerHTML+=
     `<form class='endreDiktForm'>
         <textarea class='diktInput' rows='5' cols='60' id='addPoem' spellcheck='false'></textarea>
@@ -80,7 +102,17 @@ function showMakeNewPoem() {
 
 function getOnePoem() { //Endre slik at bruker bestemmer id som dikt skal ha som også i lenger ned bytte ut med
     
-    fetch(`${myUrl}dikt/2`, {
+    //Fjerner forrige resultat hvis det er noe
+    document.getElementById("ettDikt").innerHTML="";
+    
+    //Henter diktid som er tastet inn
+    let id = document.getElementById("diktId").value;
+
+    //Setter diktid feltet tomt etter at diktid er hentet
+    document.getElementById("diktId").value = "";
+    
+    //Kjører GET kallet for å hente et dikt ved hjelp av id
+    fetch(`${myUrl}dikt/${id}`, {
         method: 'GET',
         Origin: 'http://localhost'
     })
@@ -89,25 +121,60 @@ function getOnePoem() { //Endre slik at bruker bestemmer id som dikt skal ha som
         const parser = new DOMParser();
         const xml = parser.parseFromString(data, 
             "application/xml")
-        const count = xml.getElementsByTagName("dikt").length
-        document.getElementById("ettDikt").innerHTML+=
-            `<table id='test2'>
-            <tr>
-            <td class='diktID'>Dikt ID</td>
-            <td class='tekst'>Dikt</td>
-            <td class='epost'>Eier av dikt</td>
-            </tr>
-            </table>`
-        for (var i = 0; i < count; i++){
-            const id = xml.getElementsByTagName("diktID")[i].childNodes[0].nodeValue;
-            const tekst = xml.getElementsByTagName("tekst")[i].childNodes[0].nodeValue;
-            const epost = xml.getElementsByTagName("epostadresse")[i].childNodes[0].nodeValue;
-            document.getElementById("test2").innerHTML += 
-                `<tr class='jupp'>
-                    <td class='diktID'>${id}</td>
-                    <td class='tekst'>${tekst}</td>
-                    <td class='epost'>${epost}</td>
-                </tr>`
+
+        //Antall tegn i diktet
+        const count = xml.getElementsByTagName("dikt")[0].textContent.length;
+
+        //Lagrer eposten til bruker som er logget inn
+        const userEmail = document?.getElementById("userLoggedIn")?.textContent;
+
+        //Variabler som skal vise slett dikt og endre dikt knappene
+        let deletePoem;
+        let doChangePoem;
+
+        //Sjekker at kallet inneholder et dikt
+        if (count > 0) {
+
+            //Sender dokument med html som viser overskriftene
+            document.getElementById("ettDikt").innerHTML+=
+                `<table id='test2'>
+                <tr>
+                <td class='diktID'>Dikt ID</td>
+                <td class='tekst'>Dikt</td>
+                <td class='epost'>Eier av dikt</td>
+                <td class='slettDikt'>Slett dikt</td>
+                <td class='slettDikt'>Endre dikt</td>
+                </tr>
+                </table>`
+
+                //Henter id, dikt og epost til valgt dikt fra databasen
+                const id = xml.getElementsByTagName("diktID")[0].childNodes[0].nodeValue;
+                const poem = xml.getElementsByTagName("tekst")[0].childNodes[0].nodeValue;
+                const email = xml.getElementsByTagName("epostadresse")[0].childNodes[0].nodeValue;
+
+                //Hvis eier av dikt er samme som er logget inn, vis knappene, hvis ikke: ikke vis dem
+                if (userEmail === email) {
+                    deletePoem = `<input type='button' class='slettDiktButton'
+                    value='Slett dikt' onClick='deleteOnePoem(${id})'>`;
+                    doChangePoem = `<input type='button' class='slettDiktButton' 
+                    value='Endre dikt' onClick='showChangePoem(${id}, "${poem}")'>`;
+                } else {
+                    deletePoem = "";
+                    doChangePoem= "";
+                }
+
+                //Sender document med html for å vise diktet som er valgt
+                document.getElementById("test2").innerHTML+= 
+                    `<tr>
+                        <td class='diktID'>${id}</td>
+                        <td class='tekst'>${poem}</td>
+                        <td class='epost'>${email}</td>
+                        <td class='slettDikt'>${deletePoem}</td>
+                        <td class='slettDikt'>${doChangePoem}</td>
+                    </tr>`
+        } else {
+            document.getElementById("ettDikt").innerHTML=""
+            document.getElementById("test2").innerHTML=""
         }
     })
 }
@@ -242,7 +309,7 @@ function deleteOnePoem(id) {
 
 function deleteAllMyPoems() {
 
-    if (confirm("Er du sikker på at du vil slette alle dine dikt?") == true) {
+    if (confirm("Er du sikker på at du vil slette alle diktene dine?") == true) {
         fetch(`${myUrl}dikt`, {
             method: 'DELETE',
         })

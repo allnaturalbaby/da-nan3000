@@ -251,8 +251,8 @@ if [ "$REQUEST_METHOD" = "DELETE" ]; then
 	IFS='\' #Reset delimeter
 
 
-	#Slett alle egne dikt
 	if [ $isLoggedIn = 1 ]; then
+		#Slett alle egne dikt
 		if [ ${url_array[3]} = "dikt" -a -z "${url_array[4]}" ]; then
 
 		

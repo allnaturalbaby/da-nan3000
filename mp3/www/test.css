@@ -30,9 +30,7 @@ body {
 
 .loginForm {
     display: flex;
-    flex-direction: column;
-
-    
+    flex-direction: column; 
 }
 
 .loginInput {
@@ -97,7 +95,7 @@ body {
     min-width: 10vw;
     height: 3.5vw;
     align-self: flex-end;
-
+    border-radius: 0.5vw;
 }
 
 .diktInput {
@@ -114,20 +112,23 @@ body {
     flex-direction: row;
 }
 
-.test1 {
-    border: 1px solid white;
-    color: black;
+.idInputField {
+    height: 1vw;
+    padding: 1vw;
+    border-radius: 0.5vw;
+    margin-left: 1vw;
+    width: 3vw;
+    text-align: center;
 }
 
-.addPoemInput {
-    height: 50px;
-    width: 400px;
+.findPoemButton {
+    height: 3.5vw;
+    padding: 1vw;
+    font-weight: bold;
+    border-radius: 0.5vw;
 }
 
-.addPoemButton {
-    height: 50px;
-    width: 100px;
-}
+
 
 
 
