@@ -15,5 +15,6 @@ STOPSIGNAL SIGWINCH
 RUN chmod -R 777 /usr/local/apache2/dikt/ 
 RUN chmod 755 /usr/local/apache2/cgi-bin/diktbase.cgi
 RUN apk add --no-cache bash
+RUN apt-get install -y libxml2-utils
 CMD ["httpd","-D","FOREGROUND"] 
 CMD httpd-foreground -c "LoadModule cgid_module modules/mod_cgid.so"

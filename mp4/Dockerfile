@@ -14,4 +14,5 @@ COPY ./my-httpd.conf /usr/local/apache2/conf/httpd.conf
 
 RUN chmod -R 777 /usr/local/apache2/diktbase.db 
 RUN chmod 755 /usr/local/apache2/cgi-bin/diktbase.cgi
+RUN apk add libxml2-utils
 CMD ["httpd","-D","FOREGROUND"] 

@@ -2,7 +2,7 @@
 read BODY
 
 ### Variables ###
-database_path=../../diktbase.db
+database_path=../dikt/diktbase.db
 url_path=$REQUEST_URI
 url_base=$(basename "$url_path") #last part of url, after last /
 cookie=$HTTP_COOKIE
@@ -67,11 +67,17 @@ if [ "$REQUEST_METHOD" = "GET" ]; then
 		done
 		IFS='\'
 
-		response="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-		response+="<?xml-stylesheet href=\"http://localhost/diktbaseStyle.css\"?>"
-		response+="<!DOCTYPE response SYSTEM \"http://localhost/diktbase.dtd\">"
+		response=$"<?xml version='1.0' encoding='UTF-8'?>"
+		response+="<?xml-stylesheet href='http://localhost/diktbaseStyle.css'?>"
+		response+="<!DOCTYPE response SYSTEM 'http://localhost/diktbase.dtd'>"
 		response+="<diktbase>"$allPoemsInXml"</diktbase>"
-		length=${#response}
+		oLang=$LANG oLcAll=$LC_ALL
+		LANG=C LC_ALL=C
+		test=${#response}
+		LANG=$oLang LC_ALL=$oLcAll
+
+		length=$test
+		#${#response} 
 	
 	#Get one poem
 	elif [ ${url_array[3]} = "dikt" -a ${url_array[4]} = $url_base ]; then		#if index 3 is "dikt" and index 4 is equal to last /something
@@ -85,7 +91,11 @@ if [ "$REQUEST_METHOD" = "GET" ]; then
 		response+="<?xml-stylesheet href=\"http://localhost/diktbaseStyle.css\"?>"
 		response+="<!DOCTYPE response SYSTEM \"http://localhost/diktbase.dtd\">"
 		response+="<diktbase><dikt><diktID>"${poemArray[0]}"</diktID><tekst>"${poemArray[1]}"</tekst><epostadresse>"${poemArray[2]}"</epostadresse></dikt></diktbase>"
-		length=${#response}
+		oLang=$LANG oLcAll=$LC_ALL
+		LANG=C LC_ALL=C
+		test=${#response}
+		LANG=$oLang LC_ALL=$oLcAll
+		length=$test
 	fi
 fi
 
@@ -110,8 +120,12 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
 		if [ -z $user ]; then	#If user does not exist
 			response="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 			response+="<!DOCTYPE response SYSTEM \"http://localhost/response.dtd\">"
-			response+="<response><status>0</status><statustext>Brukernavn eller passord er feil</statustext><sessionid></sessionid><user></user></response>"
-			length=${#response}
+			response+="<response><status>0</status><statustext>Bruker eksistrerer ikke</statustext><sessionid></sessionid><user></user></response>"
+			oLang=$LANG oLcAll=$LC_ALL
+			LANG=C LC_ALL=C
+			test=${#response}
+			LANG=$oLang LC_ALL=$oLcAll
+			length=$test
 			
 		else					#If user exist
 			IFS='|'
@@ -136,14 +150,22 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
 					response="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 					response+="<!DOCTYPE response SYSTEM \"http://localhost/response.dtd\">"
 					response+="<response><status>1</status><statustext>Du er logget inn</statustext><sessionid>"$sessionId"</sessionid><user>"$currentUser"</user></response>"
-					length=${#response}
+					oLang=$LANG oLcAll=$LC_ALL
+					LANG=C LC_ALL=C
+					test=${#response}
+					LANG=$oLang LC_ALL=$oLcAll
+					length=$test
 						
 
 				else	#If sessionId does exist, so duplicates doesn't happen
 					response="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 					response+="<!DOCTYPE response SYSTEM \"http://localhost/response.dtd\">"
 					response+="<response><status>0</status><statustext>Noe gikk galt, prøv igjen</statustext><sessionid></sessionid><user></user></response>"
-					length=${#response}
+					oLang=$LANG oLcAll=$LC_ALL
+					LANG=C LC_ALL=C
+					test=${#response}
+					LANG=$oLang LC_ALL=$oLcAll
+					length=$test
 						
 				fi
 
@@ -151,7 +173,11 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
 				response="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 				response+="<!DOCTYPE response SYSTEM \"http://localhost/response.dtd\">"
 				response+="<response><status>0</status><statustext>Brukernavn eller passord er feil</statustext><sessionid></sessionid><user></user></response>"
-				length=${#response}
+				oLang=$LANG oLcAll=$LC_ALL
+				LANG=C LC_ALL=C
+				test=${#response}
+				LANG=$oLang LC_ALL=$oLcAll
+				length=$test
 					
 			fi
 		fi
@@ -169,7 +195,11 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
 		response="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 		response+="<!DOCTYPE response SYSTEM \"http://localhost/response.dtd\">"
 		response+="<response><status>1</status><statustext>Bruker logget ut</statustext><sessionid>"$currentSessionId"</sessionid><user>"$currentEmail"</user></response>"
-		length=${#response}
+		oLang=$LANG oLcAll=$LC_ALL
+		LANG=C LC_ALL=C
+		test=${#response}
+		LANG=$oLang LC_ALL=$oLcAll
+		length=$test
 			
 		
 
@@ -188,13 +218,22 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
 		response="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 		response+="<!DOCTYPE response SYSTEM \"http://localhost/response.dtd\">"
 		response+="<response><status>1</status><statustext>Nytt dikt lagret</statustext><sessionid>"$currentSessionId"</sessionid><user>"$currentEmail"</user></response>"
-		length=${#response}
+		oLang=$LANG oLcAll=$LC_ALL
+		LANG=C LC_ALL=C
+		test=${#response}
+		LANG=$oLang LC_ALL=$oLcAll
+
+		length=$test
 			
 	else	
 		response="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 		response+="<!DOCTYPE response SYSTEM \"http://localhost/response.dtd\">"
 		response+="<response><status>0</status><statustext>Feil adresse</statustext><sessionid></sessionid><user></user></response>"
-		length=${#response}	
+		oLang=$LANG oLcAll=$LC_ALL
+		LANG=C LC_ALL=C
+		test=${#response}
+		LANG=$oLang LC_ALL=$oLcAll
+		length=$test	
 	fi
 fi
 
@@ -221,21 +260,33 @@ if [ "$REQUEST_METHOD" = "PUT" ]; then
 			response="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 			response+="<!DOCTYPE response SYSTEM \"http://localhost/response.dtd\">"
 			response+="<response><status>1</status><statustext>Dikt "$url_base" endret</statustext><sessionid>"$loggedInSessionId"</sessionid><user>"$currentUser"</user></response>"
-			length=${#response}
+			oLang=$LANG oLcAll=$LC_ALL
+			LANG=C LC_ALL=C
+			test=${#response}
+			LANG=$oLang LC_ALL=$oLcAll
+			length=$test
 			
 
 		else
 			response="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 			response+="<!DOCTYPE response SYSTEM \"http://localhost/response.dtd\">"
 			response+="<response><status>0</status><statustext>Feil adresse</statustext><sessionid></sessionid><user></user></response>"
-			length=${#response}
+			oLang=$LANG oLcAll=$LC_ALL
+			LANG=C LC_ALL=C
+			test=${#response}
+			LANG=$oLang LC_ALL=$oLcAll
+			length=$test
 		fi
 
 	else
 		response="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 		response+="<!DOCTYPE response SYSTEM \"http://localhost/response.dtd\">"
 		response+="<response><status>0</status><statustext>Bruker må være logget inn for å gjennomføre denne handlingen</statustext><sessionid></sessionid><user></user></response>"
-		length=${#response}
+		oLang=$LANG oLcAll=$LC_ALL
+		LANG=C LC_ALL=C
+		test=${#response}
+		LANG=$oLang LC_ALL=$oLcAll
+		length=$test
 		
 	fi
 fi
@@ -261,7 +312,11 @@ if [ "$REQUEST_METHOD" = "DELETE" ]; then
 			response="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 			response+="<!DOCTYPE response SYSTEM \"http://localhost/response.dtd\">"
 			response+="<response><status>1</status><statustext>Alle dikt tilhørende: "$currentEmail" slettet</statustext><sessionid>"$loggedInSessionId"</sessionid><user>"$currentUser"</user></response>"
-			length=${#response}
+			oLang=$LANG oLcAll=$LC_ALL
+			LANG=C LC_ALL=C
+			test=${#response}
+			LANG=$oLang LC_ALL=$oLcAll
+			length=$test
 			
 
 		#Slett dikt med $id
@@ -272,7 +327,11 @@ if [ "$REQUEST_METHOD" = "DELETE" ]; then
 			response="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 			response+="<!DOCTYPE response SYSTEM \"http://localhost/response.dtd\">"
 			response+="<response><status>1</status><statustext>Dikt "$url_base" slettet</statustext><sessionid>"$loggedInSessionId"</sessionid><user>"$currentUser"</user></response>"
-			length=${#response}
+			oLang=$LANG oLcAll=$LC_ALL
+			LANG=C LC_ALL=C
+			test=${#response}
+			LANG=$oLang LC_ALL=$oLcAll
+			length=$test
 			
 		
 		#Hvis nettadressen ikke eksisterer?
@@ -280,14 +339,22 @@ if [ "$REQUEST_METHOD" = "DELETE" ]; then
 			response="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 			response+="<!DOCTYPE response SYSTEM \"http://localhost/response.dtd\">"
 			response+="<response><status>0</status><statustext>Feil adresse</statustext><sessionid></sessionid><user></user></response>"
-			length=${#response}
+			oLang=$LANG oLcAll=$LC_ALL
+			LANG=C LC_ALL=C
+			test=${#response}
+			LANG=$oLang LC_ALL=$oLcAll
+			length=$test
 			
 		fi
 	else 
 		response="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 		response+="<!DOCTYPE response SYSTEM \"http://localhost/response.dtd\">"
 		response+="<response><status>0</status><statustext>Bruker må være logget inn for å gjennomføre denne handlingen</statustext><sessionid></sessionid><user></user></response>"
-		length=${#response}
+		oLang=$LANG oLcAll=$LC_ALL
+		LANG=C LC_ALL=C
+		test=${#response}
+		LANG=$oLang LC_ALL=$oLcAll
+		length=$test
 		
 	fi
 fi

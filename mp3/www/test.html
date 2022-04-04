@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="test.css">
     <title>Document</title>
+    <script src="test.js"></script>
 </head>
-<body onload="{getAllPoems(); getOnePoem();}">
+<body onload="getAllPoems();">
     <div class="topdiv">
         <h1 class="headline">Gruppe 12 sin diktbase</h1>
         <div class="userInfoDiv">
@@ -21,13 +22,19 @@
         </div>
     </div>
     <br>
-    
+    <form>
+        <input class="idInputField" type="text" placeholder="Dikt ID" value="" id="diktId">
+        <input class="findPoemButton" type="button" value="Finn dikt" onclick="getOnePoem()">
+    </form>
+    <br>
+    <div id="ettDikt"></div>
+    <br>
     <br>
     <h2>Alle dikt:</h2>
     <div id="alleDikt"></div>
     <br>
     
     <br>
-    <script src="test.js"></script>
+    
 </body>
 </html>
