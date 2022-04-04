@@ -52,7 +52,7 @@ function getAllPoems() {
 
                 //Henter ut id, dikt og epost til hver av diktene
                 const id = xml.getElementsByTagName("diktID")[i].childNodes[0].nodeValue;
-                const tekst = xml.getElementsByTagName("tekst")[i].childNodes[0].nodeValue;
+                const tekst = xml?.getElementsByTagName("tekst")[i]?.childNodes[0]?.nodeValue;
                 const epost = xml.getElementsByTagName("epostadresse")[i].childNodes[0].nodeValue;
 
                 //Hvis innlogget bruker er samme som eier av dikt vis knappene, hvis ikke, ikke vis dem
@@ -67,7 +67,7 @@ function getAllPoems() {
                 }
 
                 //Sender dokument med html med alle diktene i databasen
-                document.getElementById("test").innerHTML += 
+                document.getElementById("test").innerHTML+= 
                     `<tr>
                         <td class='diktID'>${id}</td>
                         <td class='tekst'>${tekst}</td>

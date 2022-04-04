@@ -72,6 +72,9 @@ char *isFileExtensionAllowed(char *fileExt) {
             mimeType = p;
 
             while (0 != (p = strtok(NULL, "\t "))) {
+                if (strcmp(fileExt, "dtd") == 0) {
+                    return "application/xml-dtd";
+                }
                 if (strcmp(fileExt, p) == 0) {
                     return mimeType;
                 }
