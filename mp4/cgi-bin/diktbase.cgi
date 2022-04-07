@@ -5,7 +5,7 @@ read BODY
 #echo
 
 ### Variables ###
-database_path=../dikt/diktbase.db
+database_path=../diktbase.db
 url_path=$REQUEST_URI
 url_base=$(basename "$url_path") #last part of url, after last /
 cookie=$HTTP_COOKIE
