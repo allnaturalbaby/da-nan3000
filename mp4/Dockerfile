@@ -7,6 +7,7 @@ COPY ./index.html /usr/local/apache2/htdocs
 COPY ./diktbase.db /usr/local/apache2/dikt
 COPY ./cgi-bin/* /usr/local/apache2/cgi-bin
 COPY ./my-httpd.conf /usr/local/apache2/conf/httpd.conf
+COPY ./diktbase.xsl /usr/local/apache2/htdocs
 
 EXPOSE 80
 
