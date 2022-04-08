@@ -139,7 +139,7 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
 
 				if [ $hash_password = $user_password ]; then		#If password is correct
 					session_id=$(uuidgen -r)	
-						
+	
 					existing_sessions=$(sqlite3 $database_path "SELECT sesjonsID FROM sesjon WHERE sesjonsID='$session_id';")
 					does_session_exist=${#existing_sessions}
 
@@ -280,7 +280,7 @@ fi
 
 #If sessionid exist send this header (When logging in)
 if [ ${#session_id} -gt "0" ]; then
-	echo "Set-Cookie:session_id="$session_id"; Max-Age=7200; SameSite=lax; Secure"
+	echo "Set-Cookie: session_id="$session_id"; Max-Age=7200; Path=/; SameSite=none; Secure"
 	echo "Content-Length: "$length
 	echo "Content-type:text/xml;charset=utf-8"
 	echo "Access-Control-Allow-Origin: http://localhost"

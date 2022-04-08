@@ -75,6 +75,9 @@ char *isFileExtensionAllowed(char *fileExt) {
                 if (strcmp(fileExt, "dtd") == 0) {
                     return "application/xml-dtd";
                 }
+                if (strcmp(fileExt, "js") == 0) {
+                    return "text/javascript";
+                }
                 if (strcmp(fileExt, p) == 0) {
                     return mimeType;
                 }
