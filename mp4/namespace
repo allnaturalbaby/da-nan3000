@@ -1,0 +1,26 @@
+#Legg til en bruker og gi den egen gruppe 
+sudo adduser --system name 
+sudo addgroup --system name
+#Kan også inneholde adduser: --no-create-home --disabled-password -- disabled-login --gecos ''
+#Legg til brukeren til gruppen
+sudo adduser name name 
+
+#Sjekk om bruker fikk group/user id
+cat /etc/subgid
+cat /etc/subuid
+#Ligger det ikke inne, sett manuelt til nærmeste ledige 100000:65536
+#Da har de mulighet å bruke alt fra 100000 til 165536, kan være 200000, 400000 osv
+
+#I /etc/docker/daemon.json legg til 
+{
+  "userns-remap": "name:name"
+}
+#der name er navnet som ble satt på gruppe og brukeren
+
+#etter dette restart daemon
+sudo systemctl restart docker.service
+
+#for å se at det er i orden
+ps -ef | grep "httpd -D FOREGROUND" 
+#eller bytt hva som blir grep'et ut i fra hva CMD i Dockerfilen sier
+da skal den satt uid være i bruk

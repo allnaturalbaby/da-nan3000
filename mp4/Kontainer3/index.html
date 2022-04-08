@@ -1,6 +1,11 @@
 <html>
-<body>
-<h1>hello, dette er webGREN siden</h1>
-<a href="/cgi-bin/diktbase.cgi">Trykk meg for cgi</a>
-</body>
+  <body>
+    <h1>hello, dette er webGREN siden</h1>
+    <a href="/cgi-bin/test.cgi">Trykk meg for cgi</a>
+    <form action="/cgi-bin/test.cgi" method="GET">
+      <input type="text" placeholder="Email" name="navn" required />
+      <input type="password" placeholder="Passord" name="psw" required />
+      <input type="submit" />
+    </form>
+  </body>
 </html>
