@@ -16,6 +16,12 @@ sqlite3 diktbase.db < diktbase.sql
 Legge eksempeldata til i database(databasen må eksistere):
 sqlite3 diktbase.db < eksempeldata.sql
 
+Brukere: 
+Epost: nora@hvcn.com Passord: Passord1
+Epost: hevos@hvcn.com Passord: Passord2
+Epost: viktor@hvcn.com Passord: Passord3
+Epost: christian@hvcn.com Passord: Passord4
+
 
 
 ### Hente ett dikt

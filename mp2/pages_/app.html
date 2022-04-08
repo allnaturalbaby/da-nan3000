@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="app.css">
+    <title>Diktbase</title>
+    <script type="text/javascript" src="app.js"></script>
+</head>
+<body onload="{getAllPoems(); loginOrLogout();}">
+    <div class="topdiv">
+        <h1 class="headline">Gruppe 12 sin diktbase</h1>
+        <div id="loginLogout" class="userInfoDiv">
+        </div>
+    </div>
+    <br>
+    <form>
+        <input class="idInputField" type="text" placeholder="Dikt ID" value="" id="diktId">
+        <input class="findPoemButton" type="button" value="Finn dikt" onclick="getOnePoem()">
+    </form>
+    <br>
+    <div id="ettDikt"></div>
+    <br>
+    <br>
+    <h2>Alle dikt:</h2>
+    <div id="alleDikt"></div>
+</body>
+</html>
