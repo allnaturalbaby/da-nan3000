@@ -12,5 +12,8 @@ COPY ./my-httpd.conf /usr/local/apache2/conf/httpd.conf
 #STOPSIGNAL SIGWINCH
  
 #RUN chmod 755 /usr/local/apache2/cgi-bin/
+RUN chmod 755 /usr/local/apache2/cgi-bin/
+RUN apk add libxml2-utils
+
 CMD ["httpd","-D","FOREGROUND"] 
 
