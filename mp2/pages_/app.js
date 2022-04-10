@@ -1,5 +1,4 @@
 let myUrl = 'http://localhost:8080/cgi-bin/diktbase.cgi/';
-let loggedInEmail = "";
 let isLoggedIn = false;
 
 function checkIfLoggedIn() {
@@ -32,7 +31,7 @@ function getAllPoems() {
         const count = xml.getElementsByTagName("dikt").length
 
         //Henter epost til innlogget bruker
-        const userEmail = document?.getElementById("userLoggedIn")?.textContent;
+        const userEmail = localStorage["loggedInEmail"];
 
         //Variabler som skal bruker til å vise slette og endre dikt knapper
         let deletePoem;
@@ -126,6 +125,21 @@ function showMakeNewPoem() {
     </form>`
 }
 
+function showChangeDeletePoem() {
+    checkIfLoggedIn();
+    if (isLoggedIn == true) {
+        document.getElementById("showChangeDeletePoem").innerHTML+=
+        `<input class="slettDiktButton" type="button" value="Lag nytt dikt" onclick="showMakeNewPoem()">
+        <input class="slettDiktButton" type="button" value="Slett alle egne dikt" onclick="deleteAllMyPoems()">
+        <input class="idInputField" type="text" placeholder="Dikt ID" value="" id="diktId">
+        <input class="findPoemButton" type="button" value="Finn dikt" onclick="getOnePoem()">`
+    } else {
+        document.getElementById("showChangeDeletePoem").innerHTML+=
+        `<input class="idInputField" type="text" placeholder="Dikt ID" value="" id="diktId">
+        <input class="findPoemButton" type="button" value="Finn dikt" onclick="getOnePoem()">`
+    }
+}
+
 function getOnePoem() { //Endre slik at bruker bestemmer id som dikt skal ha som også i lenger ned bytte ut med
     
     //Fjerner forrige resultat hvis det er noe
@@ -152,7 +166,7 @@ function getOnePoem() { //Endre slik at bruker bestemmer id som dikt skal ha som
         const exist = xml?.getElementsByTagName("dikt")[0]?.textContent;
 
         //Lagrer eposten til bruker som er logget inn
-        const userEmail = document?.getElementById("userLoggedIn")?.textContent;
+        const userEmail = localStorage["loggedInEmail"];
 
         const alertStatus = xml?.getElementsByTagName("statustext")[0]?.textContent;
 
@@ -225,22 +239,17 @@ function getOnePoem() { //Endre slik at bruker bestemmer id som dikt skal ha som
 }
 
 function loginOrLogout() {
+    checkIfLoggedIn();
     if (isLoggedIn == true) {
         document.getElementById("loginLogout").innerHTML+=
-            `<form class="loginForm">
-            <h4>Logg inn for å gjøre endringer</h4>
-            <input class="loginInput" type="email" placeholder="Epost" id="username">
-            <input class="loginInput" type="password" placeholder="Passord" id="password" onkeyup=${login('event')}>
-            <input class="button" type="button" value="Logg inn" onclick=${login('login')}">
-            </form>`
+            `<h4 class="userInfo" id="nameOfLoggedInUser"></h4>
+            <input class="button" type="button" value="Logg ut" onclick="logout()">`
     } else {
         document.getElementById("loginLogout").innerHTML+=
-            `<form class="loginForm">
-            <h4>Logg inn for å gjøre endringer</h4>
-            <input class="loginInput" type="email" placeholder="Epost" id="username">
-            <input class="loginInput" type="password" placeholder="Passord" id="password" onkeyup=${login('event')}>
-            <input class="button" type="button" value="Logg inn" onclick=${login('login')}">
-            </form>`
+            `<h4>Logg inn for å gjøre endringer</h4>
+            <input class='loginInput' type='email' placeholder='Epost' id='username'>
+            <input class='loginInput' type='password' placeholder='Passord' id='password' onKeyUp='login(event)'>
+            <input class='button' type='button' value='Logg inn' onclick='login("login")'>`
     }
 }
 
@@ -261,13 +270,18 @@ function login(event) {
             const xml = parser.parseFromString(data, 
                 "application/xml")
             const callStatus = xml.getElementsByTagName("status")[0].textContent;
-            loggedInEmail = xml.getElementsByTagName("useremail")[0].textContent;
+            const loggedInEmail = xml.getElementsByTagName("useremail")[0].textContent;
+            const loggedInFname = xml.getElementsByTagName("userfname")[0].textContent;
+            const loggedInLname = xml.getElementsByTagName("userlname")[0].textContent;
             const alertStatus = xml.getElementsByTagName("statustext")[0].textContent;
             
             if (callStatus == 1) {
-                window.location = "app1.html";
+                //window.location = "app1.html";
+                
                 localStorage["loggedInEmail"] = loggedInEmail;
-                sessionStorage.setItem('status','loggedIn');
+                localStorage["loggedInFname"] = loggedInFname;
+                localStorage["loggedInLname"] = loggedInLname;
+                location.reload();
             } else {
                 alert(alertStatus);
             }
@@ -276,8 +290,19 @@ function login(event) {
 }
 
 function getUsername() {
-    let user = localStorage["loggedInEmail"];
-    document.getElementById("userLoggedIn").innerHTML+=user;
+    checkIfLoggedIn();
+    if (isLoggedIn) {
+        let user = localStorage["loggedInEmail"];
+        //document.getElementById("userLoggedIn").innerHTML+=user;
+    }
+}
+
+function getFullName() {
+    checkIfLoggedIn();
+    if (isLoggedIn) {
+        let userName = localStorage["loggedInFname"] + localStorage["loggedInLname"];
+        document.getElementById("nameOfLoggedInUser").innerHTML+=userName;
+    }
 }
 
 
@@ -297,7 +322,8 @@ function logout() {
         const callStatus = xml.getElementsByTagName("status")[0].textContent;
         const alertStatus = xml.getElementsByTagName("statustext")[0].textContent;
         if (callStatus == 1) {
-            window.location = "app.html";
+            //window.location = "app.html";
+            location.reload();
             document.cookie= "session_id=; Max-Age=0; Path=/; SameSite=none; Secure";
         } else {
             alert(alertStatus);

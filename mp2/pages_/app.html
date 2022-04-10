@@ -8,20 +8,22 @@
     <title>Diktbase</title>
     <script type="text/javascript" src="app.js"></script>
 </head>
-<body onload="{getAllPoems(); loginOrLogout();}">
+<body onload="{getAllPoems(); loginOrLogout(); getUsername(); getFullName(); showChangeDeletePoem();}">
     <div class="topdiv">
         <h1 class="headline">Gruppe 12 sin diktbase</h1>
-        <div id="loginLogout" class="userInfoDiv">
+        <div  class="userInfoDiv">
+            <form id="loginLogout" class="loginForm"></form>
         </div>
     </div>
+    <a class="homepageLink" href="http://localhost">Gruppe 12 sin hjemmeside</a>
     <br>
-    <form>
-        <input class="idInputField" type="text" placeholder="Dikt ID" value="" id="diktId">
-        <input class="findPoemButton" type="button" value="Finn dikt" onclick="getOnePoem()">
-    </form>
+    <br>
+    <form id="showChangeDeletePoem"></form>
     <br>
     <div id="ettDikt"></div>
     <br>
+    <div id="showChangePoem"></div>
+    <div id="showMakeNewPoem"></div>
     <br>
     <h2>Alle dikt:</h2>
     <div id="alleDikt"></div>
