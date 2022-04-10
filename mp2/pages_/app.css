@@ -47,6 +47,14 @@ body {
     align-self: center;
 }
 
+.homepageLink {
+    color: white;
+    font-weight: bold;
+    font-size: 1.5vw;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
 #alleDikt {
     display: flex;
     flex-direction: column;
