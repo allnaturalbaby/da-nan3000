@@ -1,0 +1,9 @@
+{
+    "name": "Diktdatabase",
+    "description": "Brukes for å se og endre dikt",
+    "icons": [{
+        "src": "./favicon.ico",
+        "sizes": "64x64",
+        "start_url": "/localhost/app.html"
+    }]
+}

@@ -1,4 +1,4 @@
-let myUrl = 'http://localhost:8080/cgi-bin/diktbase.cgi/';
+let myUrl = 'http://localhost:8180/cgi-bin/diktbase.cgi/';
 let isLoggedIn = false;
 
 function checkIfLoggedIn() {
@@ -13,6 +13,18 @@ function checkIfLoggedIn() {
       isLoggedIn = false;
   }
 }
+
+function serviceWorkerCheck() {
+    if (!('serviceWorker' in navigator)) {
+        console.log("'ServiceWorker' er ikke støttet");
+    } else {
+        navigator.serviceWorker.register('./serviceWorker.js')
+        .then(function (reg) {console.log("Installasjon fullført")})
+        .catch(function (err) { console.log("Installasjon feilet:"+err)});
+    }
+}
+
+serviceWorkerCheck();
 
 function getAllPoems() {
     

@@ -14,6 +14,7 @@ COPY ./my-httpd.conf /usr/local/apache2/conf/httpd.conf
 #RUN chmod 755 /usr/local/apache2/cgi-bin/
 RUN chmod 755 /usr/local/apache2/cgi-bin/
 RUN apk add libxml2-utils
+RUN apk add curl
 
 CMD ["httpd","-D","FOREGROUND"] 
 
