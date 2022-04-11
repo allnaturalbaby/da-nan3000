@@ -50,7 +50,7 @@ function get_length_in_bytes() {
 #Function to create response for get poems/poem
 function create_get_response() {
 	response="<?xml version='1.0' encoding='UTF-8'?>"
-	response+="<?xml-stylesheet type='text/xsl' href='../diktbase.xsl'?>"
+	response+="<?xml-stylesheet type='text/xsl' href='http://localhost/diktbase.xsl'?>"
 	response+="<!DOCTYPE response SYSTEM 'http://localhost/diktbase.dtd'>"
 	response+="<diktbase>"$1"</diktbase>"
 	get_length_in_bytes "$response"
