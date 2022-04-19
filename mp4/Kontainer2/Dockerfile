@@ -3,6 +3,7 @@ FROM httpd:alpine
 RUN apk update && apk upgrade && apk add nano && apk add sqlite && apk add --no-cache bash
 
 COPY ./index.html /usr/local/apache2/htdocs
+COPY ./diktbase.xsl /usr/local/apache2/htdocs
 COPY ./diktbase.db /usr/local/apache2/diktbase.db
 COPY ./cgi-bin/* /usr/local/apache2/cgi-bin/
 COPY ./my-httpd.conf /usr/local/apache2/conf/httpd.conf
