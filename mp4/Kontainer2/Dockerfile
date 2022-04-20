@@ -2,6 +2,11 @@ FROM mp4docker
 
 RUN apk add sqlite && apk add libxml2-utils && apk add util-linux
 
+<<<<<<< HEAD
+=======
+COPY ./index.html /usr/local/apache2/htdocs
+COPY ./diktbase.xsl /usr/local/apache2/htdocs
+>>>>>>> adf57e8d755fa1afe3737215e424c6526b5575d4
 COPY ./diktbase.db /usr/local/apache2/diktbase.db
 COPY ./cgi-bin/* /usr/local/apache2/cgi-bin/
 
