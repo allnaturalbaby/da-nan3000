@@ -18,13 +18,21 @@ function serviceWorkerCheck() {
     if (!('serviceWorker' in navigator)) {
         console.log("'ServiceWorker' er ikke støttet");
     } else {
-        navigator.serviceWorker.register('./serviceWorker.js')
-        .then(function (reg) {console.log("Installasjon fullført")})
-        .catch(function (err) { console.log("Installasjon feilet:"+err)});
+        try {
+        const registration = navigator.serviceWorker.register('./serviceWorker.js')
+        if (registration.installing) {
+            console.log('Service worker installing');
+          } else if (registration.waiting) {
+            console.log('Service worker installed');
+          } else if (registration.active) {
+            console.log('Service worker active');
+          }
+        } catch (error) {
+          console.error(`Registration failed with ${error}`);
+        }
     }
 }
 
-serviceWorkerCheck();
 
 function getAllPoems() {
     
@@ -75,7 +83,6 @@ function getAllPoems() {
                 </tr>
                 </table>`
             }
-
             //Looper gjennom alle diktene for å vise alle
             for (var i = 0; i < count; i++){
 
@@ -210,7 +217,7 @@ function getOnePoem() { //Endre slik at bruker bestemmer id som dikt skal ha som
                     </tr>
                     </table>`
             }
-
+                
                 //Henter id, dikt og epost til valgt dikt fra databasen
                 const id = xml.getElementsByTagName("diktID")[0].childNodes[0].nodeValue;
                 const poem = xml.getElementsByTagName("tekst")[0].childNodes[0].nodeValue;
@@ -288,7 +295,6 @@ function login(event) {
             const alertStatus = xml.getElementsByTagName("statustext")[0].textContent;
             
             if (callStatus == 1) {
-                //window.location = "app1.html";
                 
                 localStorage["loggedInEmail"] = loggedInEmail;
                 localStorage["loggedInFname"] = loggedInFname;
@@ -305,7 +311,6 @@ function getUsername() {
     checkIfLoggedIn();
     if (isLoggedIn) {
         let user = localStorage["loggedInEmail"];
-        //document.getElementById("userLoggedIn").innerHTML+=user;
     }
 }
 
@@ -319,12 +324,10 @@ function getFullName() {
 
 
 function logout() {
-    //let sessionId = "07cf470e-3c65-4635-aabb-e8f9417e79b4";
    
     fetch(`${myUrl}logout`, {
         method: 'POST',
         credentials: 'include',
-        //body: "<user><sessionid>"+sessionId+"</sessionid></user>"
     })
     .then(response => response.text())
     .then(data => {
@@ -334,7 +337,6 @@ function logout() {
         const callStatus = xml.getElementsByTagName("status")[0].textContent;
         const alertStatus = xml.getElementsByTagName("statustext")[0].textContent;
         if (callStatus == 1) {
-            //window.location = "app.html";
             location.reload();
             document.cookie= "session_id=; Max-Age=0; Path=/; SameSite=none; Secure";
         } else {
@@ -371,7 +373,6 @@ function addNewPoem() {
 
 function changePoem(id) {
     let changedPoem = document.getElementById("changedPoem").value;
-    //let poemId = document.getElementById("poemId").value;
 
     fetch(`${myUrl}dikt/${id}`, {
         method: 'PUT',
@@ -394,7 +395,6 @@ function changePoem(id) {
 }
 
 function deleteOnePoem(id) {
-    //let poemIdForDelete = document.getElementById("poemIdForDelete").value;
 
     fetch(`${myUrl}dikt/${id}`, {
         method: 'DELETE',

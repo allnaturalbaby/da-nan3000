@@ -16,6 +16,7 @@ is_logged_in="0"
 response=""
 length=""
 
+
 #Function to check if user is logged in
 function check_if_logged_in() {
 	
@@ -50,7 +51,7 @@ function get_length_in_bytes() {
 #Function to create response for get poems/poem
 function create_get_response() {
 	response="<?xml version='1.0' encoding='UTF-8'?>"
-	response+="<?xml-stylesheet type='text/xsl' href='http://localhost/diktbase.xsl'?>"
+	response+="<?xml-stylesheet type='text/xsl' href='http://localhost:8180/diktbase.xsl'?>"
 	response+="<!DOCTYPE response SYSTEM 'http://localhost/diktbase.dtd'>"
 	response+="<diktbase>"$1"</diktbase>"
 	get_length_in_bytes "$response"
@@ -83,7 +84,7 @@ if [ "$REQUEST_METHOD" = "GET" ]; then
 		do
 			all_poems_in_xml+=$(echo "<dikt>")
 			all_poems_in_xml+=$(echo "<diktID>$(echo $poem | cut -d '|' -f1)</diktID>")
-			all_poems_in_xml+=$(echo "<tekst>$(echo $poem | cut -d '|' -f2)</tekst>")
+			all_poems_in_xml+=$(echo -e "<tekst>$(echo $poem | cut -d '|' -f2)</tekst>")
 			all_poems_in_xml+=$(echo "<epostadresse>$(echo $poem | cut -d '|' -f3)</epostadresse>") 
 			all_poems_in_xml+=$(echo "</dikt>")
 		done
@@ -280,7 +281,7 @@ fi
 
 #If sessionid exist send this header (When logging in)
 if [ ${#session_id} -gt "0" ]; then
-	echo "Set-Cookie: session_id="$session_id"; Max-Age=7200; Path=/; SameSite=none; Secure"
+	echo "Set-Cookie: session_id="$session_id"; Max-Age=7200; Path=/;"
 	echo "Content-Length: "$length
 	echo "Content-type:text/xml;charset=utf-8"
 	echo "Access-Control-Allow-Origin: http://localhost"
