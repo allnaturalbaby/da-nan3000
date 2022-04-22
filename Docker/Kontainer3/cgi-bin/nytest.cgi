@@ -10,9 +10,6 @@ session_id=""
 cookie=$HTTP_COOKIE
 user_status=""
 current_session=""
-logged_in_email=""
-logged_in_fname=""
-logged_in_lname=""
 
 current_session=$(echo $cookie | cut -f2 -d'=')
 
@@ -45,7 +42,6 @@ else
     html+=$(
         cat << EOF
             <form class="logoutform" method="post" accept-charset="utf-8">
-                <h4>$logged_in_fname</h4>
                 <input class="loginlogoutbutton" type="submit" name="logout" value="logout">
             </form>
             </div>
@@ -86,17 +82,6 @@ if [ $body == "getonepoem" ]; then
     one_poem_text=$(xmllint --format --xpath "//tekst/text()" - <<<"$one_poem")
     one_poem_owner=$(xmllint --xpath "//epostadresse/text()" - <<<"$one_poem")
 
-    ting="hei"
-
-
-if [ $ting == "hei" ]; then
-    change_poem_button="<form method=\"POST\"><input class=\"buttons\" type=\"submit\" name=\"showchangepoem $id_one_poem !$one_poem_text\" value=\"Endre\"></form>"
-    delete_poem_button="<form method=\"POST\"><input class=\"buttons\" type=\"submit\" name=\"deleteone_poem $one_poem_text\" value=\"Slett\"></form>"
-
-else
-    change_poem_button=""
-    delete_poem_button=""
-fi
 
     if [ -z $cookie ]; then
         html+=$(
@@ -129,8 +114,8 @@ EOF
                     <td class="id">$id_one_poem</td>
                     <td class="diktforinnlogget">$one_poem_text</td>
                     <td class="eier">$one_poem_owner</td>
-                    <td>$change_poem_button</td>
-                    <td>$delete_poem_button</td>
+                    <td><form method="POST"><input class="buttons" type="submit" name="showchangepoem $id_one_poem !$one_poem_text" value="Endre"></form></td>
+                    <td><form method="POST"><input class="buttons" type="submit" name="deleteone_poem $one_poem_text" value="Slett"></form></td>
                 </tr>
                 </table>
                 <br>
@@ -188,18 +173,6 @@ fi
 for ((i=0; i<$length;i++))
 do
 
-ting="hei"
-
-
-if [ $ting == "hei" ]; then
-    change_poem_button="<form method=\"POST\"><input class=\"buttons\" type=\"submit\" name=\"showchangepoem ${id[i]} !${poems_array[i]}\" value=\"Endre\"></form>"
-    delete_poem_button="<form method=\"POST\"><input class=\"buttons\" type=\"submit\" name=\"deleteonepoem ${id[i]}\" value=\"Slett\"></form>"
-
-else
-    change_poem_button=""
-    delete_poem_button=""
-fi
-
 if [ -z $cookie ]; then
     html+=$(
         cat << EOF
@@ -218,16 +191,14 @@ else
                 <td class="id">${id[i]}</td>
                 <td class="diktforinnlogget">${poems_array[i]}</td>
                 <td class="eier">${email[i]}</td>
-                <td>$change_poem_button</td>
-                <td>$delete_poem_button</td>
+                <td><form method="POST"><input class="buttons" type="submit" name="showchangepoem ${id[i]} !${poems_array[i]}" value="Endre"></form></td>
+                <td><form method="POST"><input class="buttons" type="submit" name="deleteonepoem ${id[i]}" value="Slett"></form></td>
             </tr>
             </div>
 EOF
     )
 fi
 done
-
-
 
 
 #Handlinger
@@ -239,52 +210,82 @@ if [ $split_at_equal == "login" ]; then
     password=$(echo $BODY | cut -f3 -d'=')
     info=$(curl -H "Accept: application/xml" --cookie "session_id=$current_session" -d "<user><username>$email</username><password>$password</password></user>" -X POST $url_base"login")
 
-    status=$(xmllint --xpath "//status/text()" - <<<"$info")
     session_id=$(xmllint --xpath "//sessionid/text()" - <<<"$info")
-    logged_in_email=$(xmllint --xpath "//useremail/text()" - <<<"$info")
-    logged_in_fname=$(xmllint --xpath "//userfname/text()" - <<<"$info")
-    logged_in_lname=$(xmllint --xpath "//userlname/text()" - <<<"$info")
-
-
-    output+="Status $status <br>"
-    output+="Sessionid: $session_id <br>"
+    status=$(xmllint --xpath "//status/text()" - <<<"$info")
+    statustext=$(xmllint --xpath "//statustext/text()" - <<<"$info")
 
     if [ $status == "1" ]; then
-        output+="Logget inn <br>"
+        html+="<h2 class=\"statusgood\">$statustext<h2>"
         user_status="loggedin"
     else
-        output+="Ikke logget inn <br>"
+        html+="<h2 class=\"statusbad\">$statustext<h2>"
     fi
 
-    
 
 elif [ $split_at_equal == "logout" ]; then
     info=$(curl --cookie "session_id=$current_session" -X POST $url_base"logout")
+
     status=$(xmllint --xpath "//status/text()" - <<<"$info")
-    output+="Status $status <br>"
+    statustext=$(xmllint --xpath "//statustext/text()" - <<<"$info")
 
     if [ $status == "1" ]; then
-        output+="Logget ut <br>"
+        html+="<h2 class=\"statusgood\">$statustext<h2>"
         user_status="loggedout"
     else
-        output+="Ikke logget ut <br>"
+        html+="<h2 class=\"statusbad\">$statustext<h2>"
     fi
 
 elif [ $split_at_equal == "newpoem" ]; then
     new_poem=$(echo $BODY | sed s/%C3%B8/ø/g | sed s/%C3%A5/å/g | sed s/%2C/,/g | sed s/%C3%A6/æ/g | sed s/%3F/?/g | sed s/%3B/';'/g | cut -f2 -d'=' | sed s/+/" "/g)
     info=$(curl -H "Accept: application/xml" --cookie "session_id=$current_session" -d "<dikt><tekst>$new_poem</tekst></dikt>" -X POST $url_base"dikt")
 
+    status=$(xmllint --xpath "//status/text()" - <<<"$info")
+    statustext=$(xmllint --xpath "//statustext/text()" - <<<"$info")
+
+    if [ $status == "1" ]; then
+        html+="<h2 class=\"statusgood\">$statustext<h2>"
+    else
+        html+="<h2 class=\"statusbad\">$statustext<h2>"
+    fi
+
 elif [ $split_at_plus == "deleteonepoem" ]; then
     id_to_delete=$(echo $BODY | cut -f2 -d'+' | cut -f1 -d'=')
     info=$(curl -H "Accept: application/xml" --cookie "session_id=$current_session" -X DELETE $url_base"dikt/$id_to_delete")
+
+    status=$(xmllint --xpath "//status/text()" - <<<"$info")
+    statustext=$(xmllint --xpath "//statustext/text()" - <<<"$info")
+
+    if [ $status == "1" ]; then
+        html+="<h2 class=\"statusgood\">$statustext<h2>"
+    else
+        html+="<h2 class=\"statusbad\">$statustext<h2>"
+    fi
 
 elif [ $split_at_plus == "changepoem" ]; then
     changed_poem=$(echo $BODY | sed s/%C3%B8/ø/g | sed s/%C3%A5/å/g | sed s/%2C/,/g | sed s/%C3%A6/æ/g | sed s/%3F/?/g | sed s/%3B/';'/g | cut -f2 -d'=' | sed s/+/" "/g)
     id_to_change=$(echo $BODY | cut -f2 -d'+' | cut -f1 -d'=')
     info=$(curl -H "Accept: application/xml" --cookie "session_id=$current_session" -d "<dikt><tekst>$changed_poem</tekst></dikt>" -X PUT $url_base"dikt/$id_to_change")
 
+    status=$(xmllint --xpath "//status/text()" - <<<"$info")
+    statustext=$(xmllint --xpath "//statustext/text()" - <<<"$info")
+
+    if [ $status == "1" ]; then
+        html+="<h2 class=\"statusgood\">$statustext<h2>"
+    else
+        html+="<h2 class=\"statusbad\">$statustext<h2>"
+    fi
+
 elif [ $split_at_equal == "deleteallmypoems" ]; then
     info=$(curl -H "Accept: application/xml" --cookie "session_id=$current_session" -X DELETE $url_base"dikt")
+
+    status=$(xmllint --xpath "//status/text()" - <<<"$info")
+    statustext=$(xmllint --xpath "//statustext/text()" - <<<"$info")
+
+    if [ $status == "1" ]; then
+        html+="<h2 class=\"statusgood\">$statustext<h2>"
+    else
+        html+="<h2 class=\"statusbad\">$statustext<h2>"
+    fi
 
 elif [ $split_at_plus == "showchangepoem" ]; then
     id_change_poem=$(echo $BODY | cut -f2 -d'+')

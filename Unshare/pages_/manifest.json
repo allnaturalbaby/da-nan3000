@@ -4,7 +4,7 @@
     "display": "standalone",
     "start_url": "/",
     "icons": [{
-        "src": "./noe.png",
+        "src": "./favicon.png",
         "sizes": "225x225"
     }]
 }

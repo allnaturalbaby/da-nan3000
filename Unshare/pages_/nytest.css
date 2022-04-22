@@ -86,3 +86,11 @@ table, th, td {
     border-collapse: collapse;
     padding: 7px;
 }
+
+.statusgood {
+    color: green;
+}
+
+.statusbad {
+    color: red;
+}
