@@ -1,4 +1,4 @@
-# Lage "How to start all and stuff here"
+# How to start all and how to namespace
 
 ### Hvis apache2 kjører
 ```

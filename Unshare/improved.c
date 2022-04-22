@@ -39,7 +39,7 @@ char *getResponseHeaderFromMimeType(char *mimeType, char *path) {
     length = st.st_size;
 
     // sprintf(header, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", mimeType);
-    sprintf(header, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nAccess-Control-Allow-Origin: http://localhost\r\n\r\n", mimeType, length);
+    sprintf(header, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n", mimeType, length);
 
     logger(header, 2);
 
